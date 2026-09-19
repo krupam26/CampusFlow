@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { getNotificationIds } from "@/lib/notifications";
 import { useCampusFlowStore } from "@/stores/campusflow-store";
 
 type Notification = {
@@ -40,10 +41,21 @@ export default function NotificationsPage() {
     (state) => state.overrides
   );
 
+  const readNotificationIds = useCampusFlowStore(
+    (state) => state.readNotificationIds
+  );
+
+  const markNotificationRead = useCampusFlowStore(
+    (state) => state.markNotificationRead
+  );
+
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
   const tomorrowKey = getDateKey(tomorrow);
+  const twoDays = new Date();
+  twoDays.setDate(twoDays.getDate() + 2);
+  const twoDaysKey = getDateKey(twoDays);
 
   const notifications: Notification[] = [];
 
@@ -52,6 +64,16 @@ export default function NotificationsPage() {
   assignments
     .filter((assignment) => !assignment.completed)
     .forEach((assignment) => {
+      if (assignment.dueDate === twoDaysKey) {
+        notifications.push({
+          id: `assignment-two-days-${assignment.id}`,
+          type: "warning",
+          title: `${assignment.title} is due in 2 days`,
+          description: `${assignment.subject} · ${assignment.priority} priority`,
+          meta: "DUE IN 2 DAYS",
+        });
+      }
+
       if (assignment.dueDate === tomorrowKey) {
         notifications.push({
           id: `assignment-tomorrow-${assignment.id}`,
@@ -106,6 +128,11 @@ export default function NotificationsPage() {
     });
 
   const sortedNotifications = notifications.slice(0, 20);
+  const unreadNotificationCount = getNotificationIds(
+    assignments,
+    tasks,
+    overrides
+  ).filter((id) => !readNotificationIds.includes(id)).length;
 
   return (
     <AppShell>
@@ -142,7 +169,7 @@ export default function NotificationsPage() {
                 </p>
 
                 <p className="pixel-heading mt-1 text-xl">
-                  {sortedNotifications.length}
+                  {unreadNotificationCount}
                 </p>
               </div>
             </div>
@@ -169,6 +196,8 @@ export default function NotificationsPage() {
                   <NotificationCard
                     key={notification.id}
                     notification={notification}
+                    isRead={readNotificationIds.includes(notification.id)}
+                    onRead={() => markNotificationRead(notification.id)}
                   />
                 ))}
               </div>
@@ -183,8 +212,12 @@ export default function NotificationsPage() {
 
 function NotificationCard({
   notification,
+  isRead,
+  onRead,
 }: {
   notification: Notification;
+  isRead: boolean;
+  onRead: () => void;
 }) {
   const config = {
     warning: {
@@ -216,7 +249,11 @@ function NotificationCard({
   const Icon = config.icon;
 
   return (
-    <div className="pixel-border-subtle flex gap-4 bg-card p-4 md:p-5">
+    <div
+      className={`pixel-border-subtle flex gap-4 bg-card p-4 md:p-5 ${
+        isRead ? "opacity-60" : ""
+      }`}
+    >
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center border ${config.boxClass}`}
       >
@@ -238,6 +275,16 @@ function NotificationCard({
           {notification.description}
         </p>
       </div>
+
+      {!isRead && (
+        <button
+          type="button"
+          onClick={onRead}
+          className="ml-auto shrink-0 self-start text-right text-xs font-semibold text-primary hover:text-primary/70"
+        >
+          MARK AS READ
+        </button>
+      )}
     </div>
   );
 }

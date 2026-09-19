@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
+import { NotificationToast } from "./notification-toast";
 
 export function AppShell({
   children,
@@ -38,6 +39,8 @@ export function AppShell({
             {children}
           </main>
         </div>
+
+        <NotificationToast />
       </div>
     </div>
   );

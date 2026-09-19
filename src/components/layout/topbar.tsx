@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Bell,
   Command,
@@ -9,12 +10,30 @@ import {
 } from "lucide-react";
 
 import { ThemeToggle } from "./theme-toggle";
+import { getNotificationIds } from "@/lib/notifications";
+import { useCampusFlowStore } from "@/stores/campusflow-store";
 
 type TopbarProps = {
   onMenuClick?: () => void;
 };
 
 export function Topbar({ onMenuClick }: TopbarProps) {
+  const assignments = useCampusFlowStore(
+    (state) => state.assignments
+  );
+  const tasks = useCampusFlowStore((state) => state.tasks);
+  const overrides = useCampusFlowStore(
+    (state) => state.overrides
+  );
+  const readNotificationIds = useCampusFlowStore(
+    (state) => state.readNotificationIds
+  );
+  const hasUnreadNotifications = getNotificationIds(
+    assignments,
+    tasks,
+    overrides
+  ).some((id) => !readNotificationIds.includes(id));
+
   return (
     <header className="flex h-[78px] items-center justify-between border-b bg-background px-5 sm:px-7 lg:px-9">
       <div className="flex items-center gap-3">
@@ -48,14 +67,17 @@ export function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <button
+        <Link
+          href="/notifications"
           className="relative flex h-10 w-10 items-center justify-center rounded-lg border bg-card"
           aria-label="Notifications"
         >
           <Bell className="h-4 w-4" />
 
-          <span className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
-        </button>
+          {hasUnreadNotifications && (
+            <span className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
+          )}
+        </Link>
 
         <div className="pixel hidden text-[10px] text-muted-foreground md:block">
           WED · SEP 19

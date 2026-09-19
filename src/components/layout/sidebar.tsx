@@ -10,11 +10,11 @@ import {
   GraduationCap,
   LayoutDashboard,
   Settings,
-  
-  Trophy,
   X,
 } from "lucide-react";
 
+import { getNotificationIds } from "@/lib/notifications";
+import { useCampusFlowStore } from "@/stores/campusflow-store";
 
 type SidebarProps = {
   mobileOpen?: boolean;
@@ -36,13 +36,11 @@ const mainNav = [
     name: "Assignments",
     href: "/assignments",
     icon: ClipboardList,
-    count: 2,
   },
   {
     name: "Tasks",
     href: "/tasks",
     icon: CheckSquare2,
-    count: 3,
   },
   {
     name: "AI Assistant",
@@ -56,6 +54,28 @@ export function Sidebar({
   onClose,
 }: SidebarProps) {
   const pathname = usePathname();
+  const assignments = useCampusFlowStore(
+    (state) => state.assignments
+  );
+  const tasks = useCampusFlowStore((state) => state.tasks);
+  const overrides = useCampusFlowStore(
+    (state) => state.overrides
+  );
+  const readNotificationIds = useCampusFlowStore(
+    (state) => state.readNotificationIds
+  );
+  const hasUnreadNotifications = getNotificationIds(
+    assignments,
+    tasks,
+    overrides
+  ).some((id) => !readNotificationIds.includes(id));
+  const pendingAssignmentCount = assignments.filter(
+    (assignment) => !assignment.completed && assignment.status !== "Completed"
+  ).length;
+  const pendingTaskCount = tasks.filter(
+    (task) => !task.completed && task.status !== "Completed"
+  ).length;
+
   return (
     <aside
       className={[
@@ -106,6 +126,12 @@ export function Sidebar({
           {mainNav.map((item) => {
             const Icon = item.icon;
             const isActive = pathname === item.href;
+            const count =
+              item.name === "Assignments"
+                ? pendingAssignmentCount
+                : item.name === "Tasks"
+                  ? pendingTaskCount
+                  : undefined;
 
             return (
               <Link
@@ -133,9 +159,9 @@ export function Sidebar({
                   {item.name}
                 </span>
 
-                {item.count !== undefined && (
+                {count !== undefined && count > 0 && (
                   <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
-                    {item.count}
+                    {count}
                   </span>
                 )}
               </Link>
@@ -161,17 +187,11 @@ export function Sidebar({
     Notifications
   </span>
 
-  <span className="h-2 w-2 rounded-full bg-primary" />
+  {hasUnreadNotifications && (
+    <span className="h-2 w-2 rounded-full bg-primary" />
+  )}
 </Link>
 
-          
-
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
-            <Trophy className="h-[17px] w-[17px]" />
-            <span className="flex-1 text-left">
-              Achievements
-            </span>
-          </button>
         </nav>
 
         {/* AI card */}
@@ -226,7 +246,7 @@ export function Sidebar({
             </p>
 
             <p className="mt-0.5 text-[9px] text-sidebar-muted">
-              AIML · LVL 12
+              AIML
             </p>
           </div>
         </div>

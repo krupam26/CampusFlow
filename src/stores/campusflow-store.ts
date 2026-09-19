@@ -14,6 +14,7 @@ type CampusFlowState = {
   overrides: ScheduleOverride[];
   assignments: Assignment[];
   tasks: Task[];
+  readNotificationIds: string[];
 
   selectedDay: string;
 
@@ -40,6 +41,7 @@ type CampusFlowState = {
   updateTask: (id: string, task: Partial<Task>) => void;
   deleteTask: (id: string) => void;
   toggleTask: (id: string) => void;
+  markNotificationRead: (id: string) => void;
 
   setSelectedDay: (day: string) => void;
 
@@ -164,6 +166,7 @@ const initialState = {
   overrides: [],
   assignments: [],
   tasks: [],
+  readNotificationIds: [],
   selectedDay: "Monday",
 };
 
@@ -227,11 +230,17 @@ export const useCampusFlowStore = create<CampusFlowState>()(
 
       toggleAssignment: (id) =>
         set((state) => ({
-          assignments: state.assignments.map((item) =>
-            item.id === id
-              ? { ...item, completed: !("completed" in item && item.completed) }
-              : item
-          ),
+          assignments: state.assignments.map((item) => {
+            if (item.id !== id) return item;
+
+            const completed = !item.completed;
+
+            return {
+              ...item,
+              completed,
+              status: completed ? "Completed" : "Pending",
+            };
+          }),
         })),
 
       addTask: (task) =>
@@ -267,6 +276,13 @@ export const useCampusFlowStore = create<CampusFlowState>()(
       };
     }),
   })),
+
+      markNotificationRead: (id) =>
+        set((state) => ({
+          readNotificationIds: state.readNotificationIds.includes(id)
+            ? state.readNotificationIds
+            : [...state.readNotificationIds, id],
+        })),
 
       setSelectedDay: (day) =>
         set({

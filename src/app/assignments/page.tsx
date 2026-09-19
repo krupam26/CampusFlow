@@ -36,11 +36,13 @@ export default function AssignmentsPage() {
   );
 
   const completed = assignments.filter(
-    (assignment) => assignment.status === "Completed"
+    (assignment) =>
+      assignment.completed || assignment.status === "Completed"
   ).length;
 
   const pending = assignments.filter(
-    (assignment) => assignment.status !== "Completed"
+    (assignment) =>
+      !assignment.completed && assignment.status !== "Completed"
   ).length;
 
   const sortedAssignments = [...assignments].sort((a, b) => {
@@ -219,7 +221,9 @@ function AssignmentCard({
   onToggle: () => void;
   onDelete: () => void;
 }) {
-  const status = assignment.status ?? "Pending";
+  const status = assignment.completed
+    ? "Completed"
+    : assignment.status ?? "Pending";
   const isCompleted =
     assignment.completed ?? status === "Completed";
 
