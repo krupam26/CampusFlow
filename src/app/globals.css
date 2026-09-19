@@ -357,6 +357,52 @@ aside button:hover {
   border-color: var(--foreground);
 }
 
+.assignment-status-completed,
+.assignment-status-progress,
+.assignment-status-pending,
+.assignment-priority-high,
+.assignment-priority-medium,
+.assignment-priority-low {
+  border: 1px solid;
+  font-weight: 600;
+}
+
+.assignment-status-completed {
+  border-color: #86efac;
+  background-color: #dcfce7;
+  color: #166534;
+}
+
+.assignment-status-progress {
+  border-color: #7dd3fc;
+  background-color: #e0f2fe;
+  color: #075985;
+}
+
+.assignment-status-pending {
+  border-color: #fcd34d;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.assignment-priority-high {
+  border-color: #fca5a5;
+  background-color: #fee2e2;
+  color: #991b1b;
+}
+
+.assignment-priority-medium {
+  border-color: #fcd34d;
+  background-color: #fef3c7;
+  color: #92400e;
+}
+
+.assignment-priority-low {
+  border-color: #7dd3fc;
+  background-color: #e0f2fe;
+  color: #075985;
+}
+
 .form-input:focus {
   border-color: var(--primary);
   box-shadow: 3px 3px 0px var(--primary);

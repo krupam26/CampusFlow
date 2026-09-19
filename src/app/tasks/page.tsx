@@ -177,17 +177,17 @@ function TaskCard({
 }) {
   const statusClass =
     task.status === "Completed"
-      ? "border-success/30 bg-success/10 text-success"
+      ? "assignment-status-completed"
       : task.status === "In Progress"
-        ? "border-primary/30 bg-primary/10 text-primary"
-        : "border-warning/30 bg-warning/10 text-warning";
+        ? "assignment-status-progress"
+        : "assignment-status-pending";
 
   const priorityClass =
     task.priority === "High"
-      ? "text-destructive"
+      ? "assignment-priority-high"
       : task.priority === "Medium"
-        ? "text-warning"
-        : "text-success";
+        ? "assignment-priority-medium"
+        : "assignment-priority-low";
 
   return (
     <div
@@ -234,7 +234,7 @@ function TaskCard({
             </span>
 
             <span
-              className={`border border-border bg-muted px-2 py-0.5 text-[10px] ${priorityClass}`}
+              className={`px-2 py-0.5 text-[10px] ${priorityClass}`}
             >
               {task.priority.toUpperCase()} PRIORITY
             </span>

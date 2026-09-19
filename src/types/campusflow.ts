@@ -70,5 +70,6 @@ export interface Assignment {
   dueDate: string;
   status: AssignmentStatus;
   priority: AssignmentPriority;
+  completed?: boolean;
   description?: string;
 }

@@ -3,7 +3,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   Bell,
-  BookOpen,
   Bot,
   CalendarDays,
   CheckSquare2,
@@ -45,11 +44,6 @@ const mainNav = [
     href: "/tasks",
     icon: CheckSquare2,
     count: 3,
-  },
-  {
-    name: "Subjects",
-    href: "/subjects",
-    icon: BookOpen,
   },
 ];
 
@@ -106,40 +100,43 @@ export function Sidebar({
 
         <nav className="space-y-1.5">
           {mainNav.map((item) => {
-  const Icon = item.icon;
-  const isActive = pathname === item.href;
+            const Icon = item.icon;
+            const isActive = pathname === item.href;
 
-  return (
-    <Link
-      key={item.name}
-      href={item.href}
-      onClick={onClose}
-      className={`group flex w-full items-center gap-3 px-3 py-3 text-sm transition-all ${
-        isActive
-          ? "bg-primary text-primary-foreground pixel-shadow"
-          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-      }`}
-    >
-      <Icon className="h-4 w-4 shrink-0" />
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                onClick={onClose}
+                className={[
+                  "group flex w-full items-center gap-3 rounded-lg px-3 py-3",
+                  "text-[13px] transition-all",
+                  isActive
+                    ? "border border-primary/40 bg-primary/15 text-primary shadow-[3px_3px_0_rgba(232,93,74,0.25)]"
+                    : "text-sidebar-muted hover:bg-primary/10 hover:text-primary",
+                ].join(" ")}
+              >
+                <Icon
+                  className={[
+                    "h-[17px] w-[17px]",
+                    isActive
+                      ? "text-primary"
+                      : "text-sidebar-muted",
+                  ].join(" ")}
+                />
 
-      <span className="text-xs">
-        {item.name}
-      </span>
+                <span className="flex-1 text-left">
+                  {item.name}
+                </span>
 
-      {item.count !== undefined && (
-        <span
-          className={`ml-auto min-w-5 px-1.5 py-0.5 text-center text-[10px] ${
-            isActive
-              ? "bg-primary-foreground/20 text-primary-foreground"
-              : "bg-sidebar-accent text-sidebar-foreground"
-          }`}
-        >
-          {item.count}
-        </span>
-      )}
-    </Link>
-  );
-})}
+                {item.count !== undefined && (
+                  <span className="rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
+                    {item.count}
+                  </span>
+                )}
+              </Link>
+            );
+          })}
         </nav>
 
         <div className="my-7 border-t border-sidebar-border" />
