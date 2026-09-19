@@ -2,12 +2,10 @@
 
 import {
   Bell,
+  Command,
   Menu,
   Search,
 } from "lucide-react";
-
-import { Button } from "@/components/ui/button";
-import { ThemeToggle } from "./theme-toggle";
 
 type TopbarProps = {
   onMenuClick?: () => void;
@@ -15,52 +13,49 @@ type TopbarProps = {
 
 export function Topbar({ onMenuClick }: TopbarProps) {
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b bg-background/80 px-4 backdrop-blur-md lg:px-6">
-      <div className="flex items-center gap-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="lg:hidden"
+    <header className="flex h-[78px] items-center justify-between border-b bg-background px-5 sm:px-7 lg:px-9">
+      <div className="flex items-center gap-3">
+        <button
           onClick={onMenuClick}
-          aria-label="Open navigation"
+          className="flex h-10 w-10 items-center justify-center rounded-lg border bg-card lg:hidden"
+          aria-label="Open menu"
         >
           <Menu className="h-5 w-5" />
-        </Button>
+        </button>
 
-        <div className="hidden items-center gap-2 rounded-xl border bg-muted/40 px-3 py-2 text-sm text-muted-foreground sm:flex">
+        <button className="hidden h-10 w-[330px] items-center gap-3 rounded-lg border bg-card px-3 text-left text-sm text-muted-foreground sm:flex">
           <Search className="h-4 w-4" />
-          <span>Search anything...</span>
-          <kbd className="ml-8 rounded-md border bg-background px-1.5 py-0.5 text-[10px]">
-            ⌘ K
-          </kbd>
-        </div>
 
-        <Button
-          variant="outline"
-          size="icon"
-          className="sm:hidden"
+          <span className="flex-1">
+            Search your academic world...
+          </span>
+
+          <span className="flex items-center gap-1 rounded border bg-muted px-1.5 py-1 text-[9px]">
+            <Command className="h-3 w-3" />
+            K
+          </span>
+        </button>
+
+        <button
+          className="flex h-10 w-10 items-center justify-center rounded-lg border bg-card sm:hidden"
           aria-label="Search"
         >
           <Search className="h-4 w-4" />
-        </Button>
+        </button>
       </div>
 
-      <div className="flex items-center gap-1">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="relative"
+      <div className="flex items-center gap-2">
+        <button
+          className="relative flex h-10 w-10 items-center justify-center rounded-lg border bg-card"
           aria-label="Notifications"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4" />
 
-          <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-destructive" />
-        </Button>
+          <span className="absolute right-2.5 top-2 h-1.5 w-1.5 rounded-full bg-primary" />
+        </button>
 
-        <ThemeToggle />
-
-        <div className="ml-2 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground">
-          K
+        <div className="pixel hidden text-[10px] text-muted-foreground md:block">
+          WED · SEP 19
         </div>
       </div>
     </header>

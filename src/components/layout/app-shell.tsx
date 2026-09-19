@@ -10,16 +10,17 @@ export function AppShell({
 }: {
   children: React.ReactNode;
 }) {
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] =
+    useState(false);
 
   return (
-    <div className="min-h-screen bg-muted/20">
+    <div className="min-h-screen bg-background">
       <div className="flex min-h-screen">
         {mobileSidebarOpen && (
           <button
-            className="fixed inset-0 z-40 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
             onClick={() => setMobileSidebarOpen(false)}
-            aria-label="Close navigation overlay"
+            aria-label="Close navigation"
           />
         )}
 
@@ -33,7 +34,7 @@ export function AppShell({
             onMenuClick={() => setMobileSidebarOpen(true)}
           />
 
-          <main className="flex-1">
+          <main className="min-w-0 flex-1">
             {children}
           </main>
         </div>

@@ -1,7 +1,8 @@
-import { Clock3, MapPin } from "lucide-react";
-
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  ArrowRight,
+  Clock3,
+  MapPin,
+} from "lucide-react";
 
 const classes = [
   {
@@ -10,7 +11,7 @@ const classes = [
     subject: "FST",
     title: "Full Stack Development",
     room: "Lab 204",
-    type: "Lab",
+    type: "LAB",
     active: true,
   },
   {
@@ -19,7 +20,7 @@ const classes = [
     subject: "CN",
     title: "Computer Networks",
     room: "Room 302",
-    type: "Lecture",
+    type: "LECTURE",
   },
   {
     time: "02:00",
@@ -27,63 +28,66 @@ const classes = [
     subject: "ML",
     title: "Machine Learning",
     room: "Room 401",
-    type: "Lecture",
+    type: "LECTURE",
   },
 ];
 
 export function TodaysClasses() {
   return (
-    <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-base">
-              Today&apos;s classes
-            </CardTitle>
+    <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
+      <div className="mb-5 flex items-center justify-between">
+        <div>
+          <p className="pixel text-[10px] text-primary">
+            // SCHEDULE
+          </p>
 
-            <p className="mt-1 text-xs text-muted-foreground">
-              Wednesday, September 19
-            </p>
-          </div>
+          <h2 className="pixel mt-2 text-xl font-bold">
+            TODAY&apos;S CLASSES
+          </h2>
 
-          <Badge variant="secondary">
-            3 classes
-          </Badge>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Wednesday · September 19
+          </p>
         </div>
-      </CardHeader>
 
-      <CardContent className="space-y-3">
+        <span className="pixel rounded-md border-2 bg-muted px-2.5 py-1.5 text-[10px]">
+          03 CLASSES
+        </span>
+      </div>
+
+      <div className="space-y-3">
         {classes.map((item) => (
           <div
-            key={`${item.time}-${item.subject}`}
-            className={`flex items-center gap-4 rounded-xl border p-3 transition-colors ${
+            key={item.subject}
+            className={[
+              "group flex items-center gap-4 rounded-xl border-2 p-4 transition-all",
               item.active
-                ? "border-primary/20 bg-primary/5"
-                : "bg-muted/20"
-            }`}
+                ? "border-primary/35 bg-primary/[0.035] shadow-[3px_3px_0_rgba(102,87,232,0.12)]"
+                : "border-border hover:-translate-y-0.5 hover:shadow-[3px_3px_0_rgba(24,24,31,0.06)]",
+            ].join(" ")}
           >
-            <div className="w-14 text-center">
-              <p className="text-sm font-semibold">
+            <div className="w-14 shrink-0 text-center">
+              <p className="pixel text-sm font-bold">
                 {item.time}
               </p>
 
-              <p className="text-[10px] text-muted-foreground">
+              <p className="pixel mt-1 text-[8px] text-muted-foreground">
                 {item.period}
               </p>
             </div>
 
-            <div className="h-10 w-px bg-border" />
+            <div className="h-11 w-0.5 bg-border" />
 
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-xs font-bold text-primary">
+            <div className="pixel flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[11px] font-bold text-primary">
               {item.subject}
             </div>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-medium">
+              <p className="truncate text-sm font-bold">
                 {item.title}
               </p>
 
-              <div className="mt-1 flex flex-wrap gap-3 text-xs text-muted-foreground">
+              <div className="mt-1.5 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
                 <span className="flex items-center gap-1">
                   <MapPin className="h-3 w-3" />
                   {item.room}
@@ -97,13 +101,18 @@ export function TodaysClasses() {
             </div>
 
             {item.active && (
-              <Badge className="hidden sm:flex">
-                Next
-              </Badge>
+              <span className="pixel hidden rounded border border-primary/30 bg-primary/10 px-2 py-1 text-[9px] text-primary sm:block">
+                NEXT
+              </span>
             )}
           </div>
         ))}
-      </CardContent>
-    </Card>
+      </div>
+
+      <button className="pixel mt-5 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed py-3 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground">
+        VIEW COMPLETE TIMETABLE
+        <ArrowRight className="h-3.5 w-3.5" />
+      </button>
+    </section>
   );
 }
