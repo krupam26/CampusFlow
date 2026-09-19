@@ -1,5 +1,6 @@
 "use client";
-
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Bell,
   BookOpen,
@@ -15,6 +16,7 @@ import {
   X,
 } from "lucide-react";
 
+
 type SidebarProps = {
   mobileOpen?: boolean;
   onClose?: () => void;
@@ -24,7 +26,6 @@ const mainNav = [
   {
     name: "Overview",
     icon: LayoutDashboard,
-    active: true,
   },
   {
     name: "Timetable",
@@ -50,6 +51,7 @@ export function Sidebar({
   mobileOpen = false,
   onClose,
 }: SidebarProps) {
+  const pathname = usePathname();
   return (
     <aside
       className={[
@@ -99,38 +101,54 @@ export function Sidebar({
         <nav className="space-y-1.5">
           {mainNav.map((item) => {
             const Icon = item.icon;
+            const href =
+  item.name === "Overview"
+    ? "/"
+    : item.name === "Timetable"
+      ? "/timetable"
+      : "#";
+
+const isActive = pathname === href;
 
             return (
-              <button
-                key={item.name}
-                className={[
-                  "group flex w-full items-center gap-3 rounded-lg px-3 py-3",
-                  "text-[13px] transition-all",
-                  item.active
-                    ? "border border-primary/40 bg-primary/15 text-primary shadow-[3px_3px_0_rgba(102,87,232,0.25)]"
-                    : "text-sidebar-muted hover:bg-primary/10 hover:text-primary",
-                ].join(" ")}
-              >
-                <Icon
-                  className={[
-                    "h-[17px] w-[17px]",
-                    item.active
-                      ? "text-primary"
-                      : "text-sidebar-muted",
-                  ].join(" ")}
-                />
+  <Link
+    key={item.name}
+    href={
+      item.name === "Overview"
+        ? "/"
+        : item.name === "Timetable"
+          ? "/timetable"
+          : "#"
+    }
+    onClick={onClose}
+    className={[
+      "group flex w-full items-center gap-3 rounded-lg px-3 py-3",
+      "text-[13px] transition-all",
+      isActive
+        ? "border border-primary/40 bg-primary/15 text-primary shadow-[3px_3px_0_rgba(232,93,74,0.25)]"
+        : "text-sidebar-muted hover:bg-primary/10 hover:text-primary",
+    ].join(" ")}
+  >
+    <Icon
+      className={[
+        "h-[17px] w-[17px]",
+        isActive
+          ? "text-primary"
+          : "text-sidebar-muted",
+      ].join(" ")}
+    />
 
-                <span className="flex-1 text-left">
-                  {item.name}
-                </span>
+    <span className="flex-1 text-left">
+      {item.name}
+    </span>
 
-                {item.count && (
-                  <span className="pixel rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
-                    {item.count}
-                  </span>
-                )}
-              </button>
-            );
+    {item.count && (
+      <span className="pixel rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
+        {item.count}
+      </span>
+    )}
+  </Link>
+);
           })}
         </nav>
 
