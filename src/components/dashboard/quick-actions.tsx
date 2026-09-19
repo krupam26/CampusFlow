@@ -1,9 +1,12 @@
+"use client";
+
 import {
   CalendarPlus,
   FilePlus2,
   ListPlus,
   MessageCircle,
 } from "lucide-react";
+import { useState } from "react";
 
 const actions = [
   {
@@ -29,6 +32,8 @@ const actions = [
 ];
 
 export function QuickActions() {
+  const [selectedAction, setSelectedAction] = useState<string | null>(null);
+
   return (
     <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
       <div className="mb-5">
@@ -52,7 +57,9 @@ export function QuickActions() {
           return (
             <button
               key={action.title}
-              className="pixel-button flex items-center gap-3 rounded-xl border-2 bg-background p-4 text-left"
+              onClick={() => setSelectedAction(action.title)}
+              className={`pixel-button flex items-center gap-3 rounded-xl border-2 bg-background p-4 text-left ${selectedAction === action.title ? "border-primary bg-primary/10" : ""}`}
+              aria-pressed={selectedAction === action.title}
             >
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
                 <Icon className="h-4 w-4" />
@@ -70,6 +77,11 @@ export function QuickActions() {
             </button>
           );
         })}
+      </div>
+
+      <div className="mt-4 flex items-center gap-2 border-t-2 border-dashed pt-4 text-[10px] text-muted-foreground">
+        <span className="h-2 w-2 animate-pulse bg-success" />
+        {selectedAction ? `${selectedAction} READY TO OPEN` : "SELECT AN ACTION TO BEGIN"}
       </div>
     </section>
   );

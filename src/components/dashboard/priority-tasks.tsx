@@ -1,8 +1,11 @@
+"use client";
+
 import {
   Circle,
   Flag,
   Timer,
 } from "lucide-react";
+import { useState } from "react";
 
 const tasks = [
   {
@@ -26,6 +29,16 @@ const tasks = [
 ];
 
 export function PriorityTasks() {
+  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
+
+  const toggleTask = (title: string) => {
+    setCompletedTasks((current) =>
+      current.includes(title)
+        ? current.filter((task) => task !== title)
+        : [...current, title],
+    );
+  };
+
   return (
     <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
       <div className="mb-5 flex items-center justify-between">
@@ -52,21 +65,23 @@ export function PriorityTasks() {
         {tasks.map((task, index) => (
           <div
             key={task.title}
-            className="flex items-center gap-3 rounded-xl border-2 p-3.5 transition-all hover:bg-muted/50"
+            className={`flex items-center gap-3 rounded-xl border-2 p-3.5 transition-all hover:bg-muted/50 ${completedTasks.includes(task.title) ? "border-success/50 bg-success/10" : ""}`}
           >
             <span className="pixel flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-[10px]">
               0{index + 1}
             </span>
 
             <button
-              className="shrink-0 text-muted-foreground hover:text-primary"
+              onClick={() => toggleTask(task.title)}
+              className={`shrink-0 ${completedTasks.includes(task.title) ? "text-success" : "text-muted-foreground hover:text-primary"}`}
               aria-label={`Complete ${task.title}`}
+              aria-pressed={completedTasks.includes(task.title)}
             >
-              <Circle className="h-5 w-5" />
+              <Circle className={`h-5 w-5 ${completedTasks.includes(task.title) ? "fill-success/20" : ""}`} />
             </button>
 
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">
+              <p className={`truncate text-sm font-bold ${completedTasks.includes(task.title) ? "text-muted-foreground line-through" : ""}`}>
                 {task.title}
               </p>
 
