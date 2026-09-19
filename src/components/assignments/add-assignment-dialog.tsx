@@ -3,13 +3,23 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, Plus, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { toast } from "sonner";
 
+import { saveAssignment } from "@/app/actions/assignment-actions";
 import { useCampusFlowStore } from "@/stores/campusflow-store";
+
 import type {
   Assignment,
   AssignmentPriority,
   AssignmentStatus,
 } from "@/types/campusflow";
+
+import {
+  assignmentSchema,
+  type AssignmentFormValues,
+} from "@/lib/validations/assignment";
 
 type Props = {
   assignment?: Assignment;
@@ -30,41 +40,53 @@ export function AddAssignmentDialog({
 
   const [open, setOpen] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [subject, setSubject] = useState("");
-  const [code, setCode] = useState("");
-  const [dueDate, setDueDate] = useState("");
-  const [priority, setPriority] =
-    useState<AssignmentPriority>("Medium");
-  const [status, setStatus] =
-    useState<AssignmentStatus>("Pending");
-  const [description, setDescription] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: {
+      errors,
+      isSubmitting,
+    },
+  } = useForm<AssignmentFormValues>({
+    resolver: zodResolver(assignmentSchema),
 
-  const [error, setError] = useState("");
+    defaultValues: {
+      title: "",
+      subject: "",
+      code: "",
+      dueDate: "",
+      priority: "Medium",
+      status: "Pending",
+      description: "",
+    },
+  });
 
   useEffect(() => {
     if (!open) return;
 
     if (assignment) {
-      setTitle(assignment.title);
-      setSubject(assignment.subject);
-      setCode(assignment.code);
-      setDueDate(assignment.dueDate);
-      setPriority(assignment.priority);
-      setStatus(assignment.status);
-      setDescription(assignment.description ?? "");
+      reset({
+        title: assignment.title,
+        subject: assignment.subject,
+        code: assignment.code,
+        dueDate: assignment.dueDate,
+        priority: assignment.priority,
+        status: assignment.status,
+        description: assignment.description ?? "",
+      });
     } else {
-      setTitle("");
-      setSubject("");
-      setCode("");
-      setDueDate("");
-      setPriority("Medium");
-      setStatus("Pending");
-      setDescription("");
+      reset({
+        title: "",
+        subject: "",
+        code: "",
+        dueDate: "",
+        priority: "Medium",
+        status: "Pending",
+        description: "",
+      });
     }
-
-    setError("");
-  }, [open, assignment]);
+  }, [open, assignment, reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -75,7 +97,10 @@ export function AddAssignmentDialog({
       }
     };
 
-    document.addEventListener("keydown", handleEscape);
+    document.addEventListener(
+      "keydown",
+      handleEscape
+    );
 
     document.body.style.overflow = "hidden";
 
@@ -89,45 +114,33 @@ export function AddAssignmentDialog({
     };
   }, [open]);
 
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    if (!title.trim()) {
-      setError("Please enter an assignment title.");
-      return;
-    }
-
-    if (!subject.trim()) {
-      setError("Please enter a subject.");
-      return;
-    }
-
-    if (!dueDate) {
-      setError("Please select a due date.");
-      return;
-    }
-
+  function onSubmit(data: AssignmentFormValues) {
     if (assignment) {
       updateAssignment(assignment.id, {
-        title: title.trim(),
-        subject: subject.trim(),
-        code: code.trim(),
-        dueDate,
-        priority,
-        status,
-        description: description.trim(),
+        title: data.title,
+        subject: data.subject,
+        code: data.code,
+        dueDate: data.dueDate,
+        priority:
+          data.priority as AssignmentPriority,
+        status:
+          data.status as AssignmentStatus,
+        description: data.description,
+        completed: data.status === "Completed",
       });
     } else {
       addAssignment({
         id: crypto.randomUUID(),
-        title: title.trim(),
-        subject: subject.trim(),
-        code: code.trim(),
-        dueDate,
-        priority,
-        status,
-        description: description.trim(),
-        completed: status === "Completed",
+        title: data.title,
+        subject: data.subject,
+        code: data.code,
+        dueDate: data.dueDate,
+        priority:
+          data.priority as AssignmentPriority,
+        status:
+          data.status as AssignmentStatus,
+        description: data.description,
+        completed: data.status === "Completed",
       });
     }
 
@@ -173,7 +186,10 @@ export function AddAssignmentDialog({
           <div
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) {
+              if (
+                event.target ===
+                event.currentTarget
+              ) {
                 setOpen(false);
               }
             }}
@@ -181,7 +197,8 @@ export function AddAssignmentDialog({
             <div
               className="pixel-border flex w-full max-w-2xl flex-col overflow-hidden bg-card"
               style={{
-                maxHeight: "calc(100vh - 32px)",
+                maxHeight:
+                  "calc(100vh - 32px)",
                 boxShadow:
                   "6px 6px 0px hsl(var(--foreground))",
               }}
@@ -218,102 +235,113 @@ export function AddAssignmentDialog({
 
               {/* FORM */}
               <form
-                onSubmit={handleSubmit}
+                onSubmit={handleSubmit(onSubmit)}
                 className="min-h-0 overflow-y-auto p-5"
               >
                 <div className="space-y-5">
-                  {error && (
-                    <div className="border border-red-600/30 bg-red-600/10 p-3 text-xs text-red-600">
-                      {error}
-                    </div>
-                  )}
 
                   {/* DETAILS */}
                   <div className="grid gap-5 md:grid-cols-2">
+
+                    {/* TITLE */}
                     <Field label="TITLE">
                       <input
-                        value={title}
-                        onChange={(e) =>
-                          setTitle(e.target.value)
-                        }
+                        {...register("title")}
                         placeholder="FST Assignment 2"
                         className="form-input"
                       />
+
+                      {errors.title && (
+                        <ErrorMessage>
+                          {errors.title.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* SUBJECT */}
                     <Field label="SUBJECT">
                       <input
-                        value={subject}
-                        onChange={(e) =>
-                          setSubject(e.target.value)
-                        }
+                        {...register("subject")}
                         placeholder="Full Stack Development"
                         className="form-input"
                       />
+
+                      {errors.subject && (
+                        <ErrorMessage>
+                          {errors.subject.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* CODE */}
                     <Field label="CODE">
                       <input
-                        value={code}
-                        onChange={(e) =>
-                          setCode(e.target.value)
-                        }
+                        {...register("code")}
                         placeholder="FST"
                         className="form-input"
                       />
+
+                      {errors.code && (
+                        <ErrorMessage>
+                          {errors.code.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* DUE DATE */}
                     <Field label="DUE DATE">
                       <input
                         type="date"
-                        value={dueDate}
-                        onChange={(e) =>
-                          setDueDate(e.target.value)
-                        }
+                        {...register("dueDate")}
                         className="form-input"
                       />
+
+                      {errors.dueDate && (
+                        <ErrorMessage>
+                          {errors.dueDate.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* PRIORITY */}
                     <Field label="PRIORITY">
                       <select
-                        value={priority}
-                        onChange={(e) =>
-                          setPriority(
-                            e.target
-                              .value as AssignmentPriority
-                          )
-                        }
-                        className={`form-input font-semibold ${
-                          priority === "High"
-                            ? "text-red-600"
-                            : priority === "Medium"
-                              ? "text-amber-600"
-                              : "text-emerald-600"
-                        }`}
+                        {...register("priority")}
+                        className="form-input font-semibold"
                       >
-                        <option value="Low" className="text-emerald-600">
+                        <option
+                          value="Low"
+                          className="text-emerald-600"
+                        >
                           Low
                         </option>
 
-                        <option value="Medium" className="text-amber-600">
+                        <option
+                          value="Medium"
+                          className="text-amber-600"
+                        >
                           Medium
                         </option>
 
-                        <option value="High" className="text-red-600">
+                        <option
+                          value="High"
+                          className="text-red-600"
+                        >
                           High
                         </option>
                       </select>
+
+                      {errors.priority && (
+                        <ErrorMessage>
+                          {errors.priority.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* STATUS */}
                     <Field label="STATUS">
                       <select
-                        value={status}
-                        onChange={(e) =>
-                          setStatus(
-                            e.target
-                              .value as AssignmentStatus
-                          )
-                        }
+                        {...register("status")}
                         className="form-input"
                       >
                         <option value="Pending">
@@ -328,20 +356,29 @@ export function AddAssignmentDialog({
                           Completed
                         </option>
                       </select>
+
+                      {errors.status && (
+                        <ErrorMessage>
+                          {errors.status.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
                   </div>
 
                   {/* DESCRIPTION */}
                   <Field label="DESCRIPTION">
                     <textarea
-                      value={description}
-                      onChange={(e) =>
-                        setDescription(e.target.value)
-                      }
+                      {...register("description")}
                       placeholder="Add instructions, notes or submission details..."
                       rows={4}
                       className="form-input placeholder-field resize-none"
                     />
+
+                    {errors.description && (
+                      <ErrorMessage>
+                        {errors.description.message}
+                      </ErrorMessage>
+                    )}
                   </Field>
                 </div>
 
@@ -357,11 +394,14 @@ export function AddAssignmentDialog({
 
                   <button
                     type="submit"
-                    className="pixel-button pixel-border bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
+                    disabled={isSubmitting}
+                    className="pixel-button pixel-border bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {assignment
-                      ? "SAVE CHANGES"
-                      : "SAVE ASSIGNMENT"}
+                    {isSubmitting
+                      ? "SAVING..."
+                      : assignment
+                        ? "SAVE CHANGES"
+                        : "SAVE ASSIGNMENT"}
                   </button>
                 </div>
               </form>
@@ -388,5 +428,17 @@ function Field({
 
       {children}
     </label>
+  );
+}
+
+function ErrorMessage({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="text-[10px] text-destructive">
+      {children}
+    </p>
   );
 }

@@ -7,6 +7,7 @@ import { PriorityTasks } from "@/components/dashboard/priority-tasks";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 import { XPCard } from "@/components/dashboard/xp-card";
 
+
 export default function Home() {
   return (
     <AppShell>

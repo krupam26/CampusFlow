@@ -3,13 +3,21 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, Plus, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 import { useCampusFlowStore } from "@/stores/campusflow-store";
+
 import type {
   Task,
   TaskPriority,
   TaskStatus,
 } from "@/types/campusflow";
+
+import {
+  taskSchema,
+  type TaskFormValues,
+} from "@/lib/validations/task";
 
 type Props = {
   task?: Task;
@@ -30,40 +38,47 @@ export function AddTaskDialog({
 
   const [open, setOpen] = useState(false);
 
-  const [title, setTitle] = useState("");
-  const [description, setDescription] = useState("");
-  const [priority, setPriority] =
-    useState<TaskPriority>("Medium");
-  const [status, setStatus] =
-    useState<TaskStatus>("Pending");
-  const [dueDate, setDueDate] = useState("");
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: {
+      errors,
+      isSubmitting,
+    },
+  } = useForm<TaskFormValues>({
+    resolver: zodResolver(taskSchema),
 
-  const [error, setError] = useState("");
+    defaultValues: {
+      title: "",
+      dueDate: "",
+      priority: "Medium",
+      status: "Pending",
+      description: "",
+    },
+  });
 
   useEffect(() => {
     if (!open) return;
 
     if (task) {
-      setTitle(task.title);
-      setDescription(task.description ?? "");
-      setPriority(task.priority);
-      setStatus(
-        task.status ??
-          (task.completed
-            ? "Completed"
-            : "Pending")
-      );
-      setDueDate(task.dueDate ?? "");
+      reset({
+        title: task.title,
+        dueDate: task.dueDate,
+        priority: task.priority,
+        status: task.status ?? "Pending",
+        description: task.description ?? "",
+      });
     } else {
-      setTitle("");
-      setDescription("");
-      setPriority("Medium");
-      setStatus("Pending");
-      setDueDate("");
+      reset({
+        title: "",
+        dueDate: "",
+        priority: "Medium",
+        status: "Pending",
+        description: "",
+      });
     }
-
-    setError("");
-  }, [open, task]);
+  }, [open, task, reset]);
 
   useEffect(() => {
     if (!open) return;
@@ -91,35 +106,26 @@ export function AddTaskDialog({
     };
   }, [open]);
 
-  function handleSubmit(
-    event: React.FormEvent<HTMLFormElement>
-  ) {
-    event.preventDefault();
-
-    if (!title.trim()) {
-      setError("Please enter a task title.");
-      return;
-    }
-
-    const completed = status === "Completed";
+  function onSubmit(data: TaskFormValues) {
+    const completed = data.status === "Completed";
 
     if (task) {
       updateTask(task.id, {
-        title: title.trim(),
-        description: description.trim(),
-        priority,
-        status,
-        dueDate,
+        title: data.title,
+        dueDate: data.dueDate,
+        priority: data.priority as TaskPriority,
+        status: data.status as TaskStatus,
+        description: data.description,
         completed,
       });
     } else {
       addTask({
         id: crypto.randomUUID(),
-        title: title.trim(),
-        description: description.trim(),
-        priority,
-        status,
-        dueDate,
+        title: data.title,
+        dueDate: data.dueDate,
+        priority: data.priority as TaskPriority,
+        status: data.status as TaskStatus,
+        description: data.description,
         completed,
       });
     }
@@ -166,7 +172,10 @@ export function AddTaskDialog({
           <div
             className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(event) => {
-              if (event.target === event.currentTarget) {
+              if (
+                event.target ===
+                event.currentTarget
+              ) {
                 setOpen(false);
               }
             }}
@@ -174,26 +183,29 @@ export function AddTaskDialog({
             <div
               className="pixel-border flex w-full max-w-2xl flex-col overflow-hidden bg-card"
               style={{
-                maxHeight: "calc(100vh - 32px)",
+                maxHeight:
+                  "calc(100vh - 32px)",
                 boxShadow:
                   "6px 6px 0px hsl(var(--foreground))",
               }}
             >
               {/* HEADER */}
-              <div className="flex shrink-0 items-start justify-between border-b border-border p-5">
+              <div className="flex shrink-0 items-start justify-between border-b border-border bg-card p-5">
                 <div>
                   <p className="pixel text-xs text-primary">
-                    PERSONAL PRODUCTIVITY
+                    PERSONAL WORKFLOW
                   </p>
 
                   <h2 className="pixel-heading mt-1 text-xl">
-                    {task ? "EDIT TASK" : "ADD TASK"}
+                    {task
+                      ? "EDIT TASK"
+                      : "ADD TASK"}
                   </h2>
 
                   <p className="mt-1 text-xs text-muted-foreground">
                     {task
-                      ? "Update your task details."
-                      : "Add something you need to get done."}
+                      ? "Update the details of this task."
+                      : "Add a task to your personal workload."}
                   </p>
                 </div>
 
@@ -201,6 +213,7 @@ export function AddTaskDialog({
                   type="button"
                   onClick={() => setOpen(false)}
                   className="flex h-8 w-8 items-center justify-center border border-border bg-muted transition-all hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+                  aria-label="Close"
                 >
                   <X className="h-4 w-4" />
                 </button>
@@ -208,71 +221,83 @@ export function AddTaskDialog({
 
               {/* FORM */}
               <form
-                onSubmit={handleSubmit}
+                onSubmit={handleSubmit(onSubmit)}
                 className="min-h-0 overflow-y-auto p-5"
               >
                 <div className="space-y-5">
-                  {error && (
-                    <div className="border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
-                      {error}
-                    </div>
-                  )}
 
+                  {/* DETAILS */}
                   <div className="grid gap-5 md:grid-cols-2">
+
+                    {/* TITLE */}
                     <Field label="TASK TITLE">
                       <input
-                        value={title}
-                        onChange={(event) =>
-                          setTitle(event.target.value)
-                        }
-                        placeholder="Complete FST assignment"
+                        {...register("title")}
+                        placeholder="e.g. Complete FST documentation"
                         className="form-input"
                       />
+
+                      {errors.title && (
+                        <ErrorMessage>
+                          {errors.title.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* DUE DATE */}
                     <Field label="DUE DATE">
                       <input
                         type="date"
-                        value={dueDate}
-                        onChange={(event) =>
-                          setDueDate(event.target.value)
-                        }
+                        {...register("dueDate")}
                         className="form-input"
                       />
+
+                      {errors.dueDate && (
+                        <ErrorMessage>
+                          {errors.dueDate.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* PRIORITY */}
                     <Field label="PRIORITY">
                       <select
-                        value={priority}
-                        onChange={(event) =>
-                          setPriority(
-                            event.target
-                              .value as TaskPriority
-                          )
-                        }
-                        className="form-input"
+                        {...register("priority")}
+                        className="form-input font-semibold"
                       >
-                        <option value="Low">
+                        <option
+                          value="Low"
+                          className="text-emerald-600"
+                        >
                           Low
                         </option>
-                        <option value="Medium">
+
+                        <option
+                          value="Medium"
+                          className="text-amber-600"
+                        >
                           Medium
                         </option>
-                        <option value="High">
+
+                        <option
+                          value="High"
+                          className="text-red-600"
+                        >
                           High
                         </option>
                       </select>
+
+                      {errors.priority && (
+                        <ErrorMessage>
+                          {errors.priority.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
 
+                    {/* STATUS */}
                     <Field label="STATUS">
                       <select
-                        value={status}
-                        onChange={(event) =>
-                          setStatus(
-                            event.target
-                              .value as TaskStatus
-                          )
-                        }
+                        {...register("status")}
                         className="form-input"
                       >
                         <option value="Pending">
@@ -287,21 +312,29 @@ export function AddTaskDialog({
                           Completed
                         </option>
                       </select>
+
+                      {errors.status && (
+                        <ErrorMessage>
+                          {errors.status.message}
+                        </ErrorMessage>
+                      )}
                     </Field>
                   </div>
 
+                  {/* DESCRIPTION */}
                   <Field label="DESCRIPTION">
                     <textarea
-                      value={description}
-                      onChange={(event) =>
-                        setDescription(
-                          event.target.value
-                        )
-                      }
+                      {...register("description")}
                       placeholder="Add notes or details..."
                       rows={4}
-                      className="form-input resize-none"
+                      className="form-input placeholder-field resize-none"
                     />
+
+                    {errors.description && (
+                      <ErrorMessage>
+                        {errors.description.message}
+                      </ErrorMessage>
+                    )}
                   </Field>
                 </div>
 
@@ -317,11 +350,14 @@ export function AddTaskDialog({
 
                   <button
                     type="submit"
-                    className="pixel-button pixel-border bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground"
+                    disabled={isSubmitting}
+                    className="pixel-button pixel-border bg-primary px-5 py-2 text-xs font-semibold text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    {task
-                      ? "SAVE CHANGES"
-                      : "SAVE TASK"}
+                    {isSubmitting
+                      ? "SAVING..."
+                      : task
+                        ? "SAVE CHANGES"
+                        : "SAVE TASK"}
                   </button>
                 </div>
               </form>
@@ -348,5 +384,17 @@ function Field({
 
       {children}
     </label>
+  );
+}
+
+function ErrorMessage({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <p className="text-[10px] text-destructive">
+      {children}
+    </p>
   );
 }
