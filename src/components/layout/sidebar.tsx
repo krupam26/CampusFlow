@@ -10,7 +10,7 @@ import {
   GraduationCap,
   LayoutDashboard,
   Settings,
-  Sparkles,
+  
   Trophy,
   X,
 } from "lucide-react";
@@ -26,7 +26,6 @@ const mainNav = [
     name: "Overview",
     href: "/",
     icon: LayoutDashboard,
-
   },
   {
     name: "Timetable",
@@ -44,6 +43,11 @@ const mainNav = [
     href: "/tasks",
     icon: CheckSquare2,
     count: 3,
+  },
+  {
+    name: "AI Assistant",
+    href: "/ai",
+    icon: Bot,
   },
 ];
 
@@ -146,21 +150,21 @@ export function Sidebar({
         </p>
 
         <nav className="space-y-1.5">
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
-            <Bell className="h-[17px] w-[17px]" />
-            <span className="flex-1 text-left">
-              Notifications
-            </span>
-            <span className="h-2 w-2 rounded-full bg-primary" />
-          </button>
+          <Link
+  href="/notifications"
+  onClick={onClose}
+  className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary"
+>
+  <Bell className="h-[17px] w-[17px]" />
 
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
-            <Bot className="h-[17px] w-[17px]" />
-            <span className="flex-1 text-left">
-              AI Assistant
-            </span>
-            <Sparkles className="h-3.5 w-3.5 text-primary" />
-          </button>
+  <span className="flex-1 text-left">
+    Notifications
+  </span>
+
+  <span className="h-2 w-2 rounded-full bg-primary" />
+</Link>
+
+          
 
           <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
             <Trophy className="h-[17px] w-[17px]" />

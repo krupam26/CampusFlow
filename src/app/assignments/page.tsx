@@ -135,7 +135,7 @@ export default function AssignmentsPage() {
                       event.target.value as AssignmentSort
                     )
                   }
-                  className="form-input h-12 w-auto min-w-36 py-1 text-xs"
+                  className="form-input h-11 w-auto min-w-36 py-1 text-xs"
                 >
                   <option value="dueDate">Due date</option>
                   <option value="priority">Priority</option>
