@@ -1,3 +1,5 @@
+"use client";
+
 import {
   ArrowRight,
   CalendarDays,
@@ -5,10 +7,41 @@ import {
   Clock3,
   Sparkles,
 } from "lucide-react";
+import { useEffect, useState } from "react";
 
 import { PixelMascot } from "./pixel-mascot";
 
 export function MorningBriefing() {
+  const [briefing, setBriefing] = useState({
+    greeting: "GOOD MORNING",
+    label: "MORNING BRIEFING",
+    message: "Your academic world is ready.",
+  });
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+
+    if (hour >= 12 && hour < 17) {
+      setBriefing({
+        greeting: "GOOD AFTERNOON",
+        label: "AFTERNOON BRIEFING",
+        message: "Keep your momentum going.",
+      });
+    } else if (hour >= 17 && hour < 22) {
+      setBriefing({
+        greeting: "GOOD EVENING",
+        label: "EVENING BRIEFING",
+        message: "Close out the day with a smart next move.",
+      });
+    } else if (hour >= 22 || hour < 5) {
+      setBriefing({
+        greeting: "UP LATE",
+        label: "NIGHT BRIEFING",
+        message: "Keep it focused, then get some rest.",
+      });
+    }
+  }, []);
+
   return (
     <section className="pixel-grid relative overflow-hidden rounded-2xl border-2 border-foreground bg-card p-6 shadow-[6px_6px_0_rgba(102,87,232,0.22)] sm:p-8 lg:p-10">
       <div className="absolute right-0 top-0 h-32 w-32 opacity-50">
@@ -24,11 +57,11 @@ export function MorningBriefing() {
           <div>
             <div className="pixel mb-4 inline-flex items-center gap-2 rounded-md border-2 border-primary bg-primary/10 px-3 py-1.5 text-[10px] text-primary">
               <Sparkles className="h-3 w-3" />
-              MORNING BRIEFING
+              {briefing.label}
             </div>
 
             <h1 className="pixel-heading text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-              GOOD MORNING,
+              {briefing.greeting},
               <br />
               <span className="text-primary">
                 KRUPA! 👋
@@ -36,7 +69,7 @@ export function MorningBriefing() {
             </h1>
 
             <p className="mt-4 max-w-xl text-[15px] leading-7 text-muted-foreground">
-              Your academic world is ready.
+              {briefing.message}
               <br className="hidden sm:block" />
               Here&apos;s what needs your attention today.
             </p>
