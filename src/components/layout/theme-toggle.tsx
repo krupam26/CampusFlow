@@ -1,11 +1,11 @@
 "use client";
 
 import { Monitor, Moon, Sun } from "lucide-react";
-import { useTheme } from "next-themes";
+import { useTheme } from "./theme-provider";
 
 export function ThemeToggle() {
-  const { resolvedTheme, setTheme } = useTheme();
-  const isDark = resolvedTheme === "dark";
+  const { theme, setTheme } = useTheme();
+  const isDark = theme === "dark";
   const nextTheme = isDark ? "light" : "dark";
 
   return (
@@ -17,7 +17,7 @@ export function ThemeToggle() {
     >
       {isDark ? (
         <Moon className="h-4 w-4" />
-      ) : resolvedTheme === "light" ? (
+      ) : theme === "light" ? (
         <Sun className="h-4 w-4" />
       ) : (
         <Monitor className="h-4 w-4" />

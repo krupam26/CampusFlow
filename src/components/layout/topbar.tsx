@@ -3,9 +3,12 @@
 import {
   Bell,
   Command,
+  LogOut,
   Menu,
   Search,
 } from "lucide-react";
+
+import { ThemeToggle } from "./theme-toggle";
 
 type TopbarProps = {
   onMenuClick?: () => void;
@@ -57,6 +60,23 @@ export function Topbar({ onMenuClick }: TopbarProps) {
         <div className="pixel hidden text-[10px] text-muted-foreground md:block">
           WED · SEP 19
         </div>
+
+        <div className="ml-2 hidden h-10 items-center gap-2 border-l-2 border-dashed pl-3 sm:flex">
+          <div className="pixel flex h-8 w-8 items-center justify-center bg-primary text-sm text-primary-foreground shadow-[2px_2px_0_var(--foreground)]">
+            K
+          </div>
+
+          <div className="hidden text-left lg:block">
+            <p className="text-[11px] font-bold leading-none">KRUPA MEHTA</p>
+            <p className="pixel mt-1 text-[8px] text-muted-foreground">AIML · LVL 12</p>
+          </div>
+
+          <button className="ml-1 hidden text-muted-foreground hover:text-primary lg:block" aria-label="Open profile menu">
+            <LogOut className="h-3.5 w-3.5 rotate-180" />
+          </button>
+        </div>
+
+        <ThemeToggle />
       </div>
     </header>
   );

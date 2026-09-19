@@ -15,8 +15,6 @@ import {
   X,
 } from "lucide-react";
 
-import { ThemeToggle } from "./theme-toggle";
-
 type SidebarProps = {
   mobileOpen?: boolean;
   onClose?: () => void;
@@ -200,17 +198,13 @@ export function Sidebar({
 
       {/* Bottom */}
       <div className="border-t border-sidebar-border p-4">
-        <div className="mb-3 flex items-center justify-between">
-          <button
-            className="flex items-center gap-2 text-[11px] text-sidebar-muted hover:text-white"
-            aria-label="Settings"
-          >
-            <Settings className="h-4 w-4" />
-            Settings
-          </button>
-
-          <ThemeToggle />
-        </div>
+        <button
+          className="mb-3 flex items-center gap-2 text-[11px] text-sidebar-muted hover:text-white"
+          aria-label="Settings"
+        >
+          <Settings className="h-4 w-4" />
+          Settings
+        </button>
 
         <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-white/[0.025] p-3">
           <div className="pixel flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm text-white">
