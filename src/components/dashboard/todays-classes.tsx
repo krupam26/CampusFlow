@@ -1,118 +1,117 @@
-import {
-  ArrowRight,
-  Clock3,
-  MapPin,
-} from "lucide-react";
+"use client";
 
-const classes = [
-  {
-    time: "09:00",
-    period: "AM",
-    subject: "FST",
-    title: "Full Stack Development",
-    room: "Lab 204",
-    type: "LAB",
-    active: true,
-  },
-  {
-    time: "11:00",
-    period: "AM",
-    subject: "CN",
-    title: "Computer Networks",
-    room: "Room 302",
-    type: "LECTURE",
-  },
-  {
-    time: "02:00",
-    period: "PM",
-    subject: "ML",
-    title: "Machine Learning",
-    room: "Room 401",
-    type: "LECTURE",
-  },
-];
+import { CalendarDays, Clock3, MapPin } from "lucide-react";
+import { useCampusFlowStore } from "@/stores/campusflow-store";
+import type { ClassItem } from "@/types/campusflow";
+import { getEffectiveClasses } from "@/lib/schedule";
+
+function getTodayName() {
+  const days = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+
+  return days[new Date().getDay()];
+}
+
+function timeToMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number);
+  return hours * 60 + minutes;
+}
 
 export function TodaysClasses() {
+  const timetable = useCampusFlowStore((state) => state.timetable);
+const overrides = useCampusFlowStore((state) => state.overrides);
+
+ 
+
+  const classes = getEffectiveClasses(
+  timetable,
+  overrides,
+  new Date()
+);
+
   return (
-    <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
+    <section className="pixel-border-subtle bg-card p-5">
       <div className="mb-5 flex items-center justify-between">
         <div>
-          <p className="pixel text-[10px] text-primary">
-            // SCHEDULE
-          </p>
+          <p className="pixel text-xs text-primary">TODAY</p>
 
-          <h2 className="mt-2 text-xl font-bold tracking-tight">
-            TODAY&apos;S CLASSES
+          <h2 className="pixel-heading mt-1 text-xl">
+            TODAY'S CLASSES
           </h2>
-
-          <p className="mt-1 text-sm text-muted-foreground">
-            Wednesday · September 19
-          </p>
         </div>
 
-        <span className="pixel rounded-md border-2 bg-muted px-2.5 py-1.5 text-[10px]">
-          03 CLASSES
-        </span>
+        <div className="flex h-9 w-9 items-center justify-center border border-border bg-muted">
+          <CalendarDays className="h-4 w-4 text-primary" />
+        </div>
       </div>
 
-      <div className="space-y-3">
-        {classes.map((item) => (
-          <div
-            key={item.subject}
-            className={[
-              "group flex items-center gap-4 rounded-xl border-2 p-4 transition-all",
-              item.active
-                ? "border-primary/35 bg-primary/[0.035] shadow-[3px_3px_0_rgba(102,87,232,0.12)]"
-                : "border-border hover:-translate-y-0.5 hover:shadow-[3px_3px_0_rgba(24,24,31,0.06)]",
-            ].join(" ")}
-          >
-            <div className="w-14 shrink-0 text-center">
-              <p className="pixel text-sm font-bold">
-                {item.time}
-              </p>
+      {classes.length === 0 ? (
+        <div className="pixel-border-subtle flex min-h-32 flex-col items-center justify-center bg-muted/30 text-center">
+          <CalendarDays className="mb-2 h-6 w-6 text-muted-foreground" />
 
-              <p className="pixel mt-1 text-[8px] text-muted-foreground">
-                {item.period}
-              </p>
-            </div>
+          <p className="pixel text-sm text-muted-foreground">
+            NO CLASSES TODAY
+          </p>
 
-            <div className="h-11 w-0.5 bg-border" />
+          <p className="mt-1 text-xs text-muted-foreground">
+            Your schedule is clear.
+          </p>
+        </div>
+      ) : (
+        <div className="space-y-3">
+          {classes.map((item: ClassItem) => (
+            <div
+              key={item.id}
+              className="pixel-border-subtle bg-background p-4 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_hsl(var(--primary))]"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="pixel text-[10px] text-primary">
+                      {item.code}
+                    </span>
 
-            <div className="pixel flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-[11px] font-bold text-primary">
-              {item.subject}
-            </div>
+                    <span className="border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
+                      {item.type}
+                    </span>
+                  </div>
 
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-bold">
-                {item.title}
-              </p>
+                  <h3 className="pixel mt-2 text-sm">
+                    {item.subject}
+                  </h3>
 
-              <div className="mt-1.5 flex flex-wrap gap-3 text-[11px] text-muted-foreground">
-                <span className="flex items-center gap-1">
-                  <MapPin className="h-3 w-3" />
-                  {item.room}
-                </span>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {item.faculty}
+                  </p>
+                </div>
 
-                <span className="flex items-center gap-1">
-                  <Clock3 className="h-3 w-3" />
-                  {item.type}
-                </span>
+                <div className="shrink-0 text-right">
+                  <div className="flex items-center justify-end gap-1 text-xs font-medium">
+                    <Clock3 className="h-3.5 w-3.5 text-primary" />
+                    {item.startTime}
+                  </div>
+
+                  <p className="mt-1 text-[11px] text-muted-foreground">
+                    {item.endTime}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-4 flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
+                <MapPin className="h-3.5 w-3.5 text-primary" />
+                {item.room}
               </div>
             </div>
-
-            {item.active && (
-              <span className="pixel hidden rounded border border-primary/30 bg-primary/10 px-2 py-1 text-[9px] text-primary sm:block">
-                NEXT
-              </span>
-            )}
-          </div>
-        ))}
-      </div>
-
-      <button className="pixel mt-5 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed py-3 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground">
-        VIEW COMPLETE TIMETABLE
-        <ArrowRight className="h-3.5 w-3.5" />
-      </button>
+          ))}
+        </div>
+      )}
     </section>
   );
 }

@@ -25,24 +25,30 @@ type SidebarProps = {
 const mainNav = [
   {
     name: "Overview",
+    href: "/",
     icon: LayoutDashboard,
+
   },
   {
     name: "Timetable",
+    href: "/timetable",
     icon: CalendarDays,
   },
   {
     name: "Assignments",
+    href: "/assignments",
     icon: ClipboardList,
     count: 2,
   },
   {
     name: "Tasks",
+    href: "/tasks",
     icon: CheckSquare2,
     count: 3,
   },
   {
     name: "Subjects",
+    href: "/subjects",
     icon: BookOpen,
   },
 ];
@@ -73,7 +79,7 @@ export function Sidebar({
           </div>
 
           <div>
-            <h1 className="pixel text-[17px] font-bold">
+            <h1 className="text-[17px] font-bold">
               CAMPUSFLOW
             </h1>
 
@@ -94,67 +100,51 @@ export function Sidebar({
 
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
-        <p className="pixel mb-3 px-2 text-[10px] text-sidebar-muted">
+        <p className="mb-3 px-2 text-[10px] text-sidebar-muted">
           // MAIN
         </p>
 
         <nav className="space-y-1.5">
           {mainNav.map((item) => {
-            const Icon = item.icon;
-            const href =
-  item.name === "Overview"
-    ? "/"
-    : item.name === "Timetable"
-      ? "/timetable"
-      : "#";
+  const Icon = item.icon;
+  const isActive = pathname === item.href;
 
-const isActive = pathname === href;
-
-            return (
-  <Link
-    key={item.name}
-    href={
-      item.name === "Overview"
-        ? "/"
-        : item.name === "Timetable"
-          ? "/timetable"
-          : "#"
-    }
-    onClick={onClose}
-    className={[
-      "group flex w-full items-center gap-3 rounded-lg px-3 py-3",
-      "text-[13px] transition-all",
-      isActive
-        ? "border border-primary/40 bg-primary/15 text-primary shadow-[3px_3px_0_rgba(232,93,74,0.25)]"
-        : "text-sidebar-muted hover:bg-primary/10 hover:text-primary",
-    ].join(" ")}
-  >
-    <Icon
-      className={[
-        "h-[17px] w-[17px]",
+  return (
+    <Link
+      key={item.name}
+      href={item.href}
+      onClick={onClose}
+      className={`group flex w-full items-center gap-3 px-3 py-3 text-sm transition-all ${
         isActive
-          ? "text-primary"
-          : "text-sidebar-muted",
-      ].join(" ")}
-    />
+          ? "bg-primary text-primary-foreground pixel-shadow"
+          : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+      }`}
+    >
+      <Icon className="h-4 w-4 shrink-0" />
 
-    <span className="flex-1 text-left">
-      {item.name}
-    </span>
-
-    {item.count && (
-      <span className="pixel rounded bg-primary/15 px-1.5 py-0.5 text-[10px] text-primary">
-        {item.count}
+      <span className="text-xs">
+        {item.name}
       </span>
-    )}
-  </Link>
-);
-          })}
+
+      {item.count !== undefined && (
+        <span
+          className={`ml-auto min-w-5 px-1.5 py-0.5 text-center text-[10px] ${
+            isActive
+              ? "bg-primary-foreground/20 text-primary-foreground"
+              : "bg-sidebar-accent text-sidebar-foreground"
+          }`}
+        >
+          {item.count}
+        </span>
+      )}
+    </Link>
+  );
+})}
         </nav>
 
         <div className="my-7 border-t border-sidebar-border" />
 
-        <p className="pixel mb-3 px-2 text-[10px] text-sidebar-muted">
+        <p className="mb-3 px-2 text-[10px] text-sidebar-muted">
           // TOOLS
         </p>
 
@@ -191,7 +181,7 @@ const isActive = pathname === href;
             </div>
 
             <div>
-              <p className="pixel text-[11px]">
+              <p className="text-[11px]">
                 CAMPUS AI
               </p>
 
@@ -208,7 +198,7 @@ const isActive = pathname === href;
             or what you should work on next.
           </p>
 
-          <button className="pixel mt-3 text-[10px] text-primary hover:text-primary/80">
+          <button className="mt-3 text-[10px] text-primary hover:text-primary/80">
             [ ASK CAMPUS AI ]
           </button>
         </div>
@@ -225,7 +215,7 @@ const isActive = pathname === href;
         </button>
 
         <div className="flex items-center gap-3 rounded-xl border border-sidebar-border bg-white/[0.025] p-3">
-          <div className="pixel flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm text-white">
+          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-sm text-white">
             K
           </div>
 

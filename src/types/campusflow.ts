@@ -34,14 +34,7 @@ export type ScheduleOverride = {
   action: "added" | "modified" | "cancelled";
 };
 
-export type Assignment = {
-  id: string;
-  title: string;
-  subject: string;
-  dueDate: string;
-  priority: "Low" | "Medium" | "High";
-  completed: boolean;
-};
+
 
 export type Task = {
   id: string;
@@ -50,3 +43,23 @@ export type Task = {
   priority: "Low" | "Medium" | "High";
   completed: boolean;
 };
+export type AssignmentStatus =
+  | "Pending"
+  | "In Progress"
+  | "Completed";
+
+export type AssignmentPriority =
+  | "Low"
+  | "Medium"
+  | "High";
+
+export interface Assignment {
+  id: string;
+  title: string;
+  subject: string;
+  code: string;
+  dueDate: string;
+  status: AssignmentStatus;
+  priority: AssignmentPriority;
+  description?: string;
+}
