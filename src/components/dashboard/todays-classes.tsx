@@ -41,7 +41,7 @@ export function TodaysClasses() {
             // SCHEDULE
           </p>
 
-          <h2 className="pixel mt-2 text-xl font-bold">
+          <h2 className="mt-2 text-xl font-bold tracking-tight">
             TODAY&apos;S CLASSES
           </h2>
 

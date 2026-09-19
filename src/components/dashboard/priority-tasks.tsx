@@ -47,7 +47,7 @@ export function PriorityTasks() {
             // TODAY
           </p>
 
-          <h2 className="pixel mt-2 text-xl font-bold">
+          <h2 className="mt-2 text-xl font-bold tracking-tight">
             PRIORITY QUESTS
           </h2>
 

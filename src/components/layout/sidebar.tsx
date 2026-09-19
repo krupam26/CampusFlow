@@ -83,7 +83,7 @@ export function Sidebar({
 
         <button
           onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-muted hover:bg-white/5 hover:text-white lg:hidden"
+          className="flex h-8 w-8 items-center justify-center rounded-lg text-sidebar-muted hover:bg-primary/10 hover:text-primary lg:hidden"
           aria-label="Close menu"
         >
           <X className="h-4 w-4" />
@@ -107,8 +107,8 @@ export function Sidebar({
                   "group flex w-full items-center gap-3 rounded-lg px-3 py-3",
                   "text-[13px] transition-all",
                   item.active
-                    ? "border border-primary/40 bg-primary/15 text-white shadow-[3px_3px_0_rgba(102,87,232,0.25)]"
-                    : "text-sidebar-muted hover:bg-white/5 hover:text-white",
+                    ? "border border-primary/40 bg-primary/15 text-primary shadow-[3px_3px_0_rgba(102,87,232,0.25)]"
+                    : "text-sidebar-muted hover:bg-primary/10 hover:text-primary",
                 ].join(" ")}
               >
                 <Icon
@@ -141,7 +141,7 @@ export function Sidebar({
         </p>
 
         <nav className="space-y-1.5">
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-white/5 hover:text-white">
+          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
             <Bell className="h-[17px] w-[17px]" />
             <span className="flex-1 text-left">
               Notifications
@@ -149,7 +149,7 @@ export function Sidebar({
             <span className="h-2 w-2 rounded-full bg-primary" />
           </button>
 
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-white/5 hover:text-white">
+          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
             <Bot className="h-[17px] w-[17px]" />
             <span className="flex-1 text-left">
               AI Assistant
@@ -157,7 +157,7 @@ export function Sidebar({
             <Sparkles className="h-3.5 w-3.5 text-primary" />
           </button>
 
-          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-white/5 hover:text-white">
+          <button className="group flex w-full items-center gap-3 rounded-lg px-3 py-3 text-[13px] text-sidebar-muted hover:bg-primary/10 hover:text-primary">
             <Trophy className="h-[17px] w-[17px]" />
             <span className="flex-1 text-left">
               Achievements
@@ -199,7 +199,7 @@ export function Sidebar({
       {/* Bottom */}
       <div className="border-t border-sidebar-border p-4">
         <button
-          className="mb-3 flex items-center gap-2 text-[11px] text-sidebar-muted hover:text-white"
+          className="mb-3 flex items-center gap-2 text-[11px] text-sidebar-muted hover:text-primary"
           aria-label="Settings"
         >
           <Settings className="h-4 w-4" />

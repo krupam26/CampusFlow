@@ -105,16 +105,16 @@ function SummaryCard({
           {icon}
         </div>
 
-        <span className="pixel text-[10px]">
+        <span className="text-xs font-semibold tracking-[0.12em]">
           {label}
         </span>
       </div>
 
-      <p className="pixel mt-5 text-[17px] font-bold text-foreground">
+      <p className="mt-5 text-xl font-bold tracking-tight text-foreground">
         {title}
       </p>
 
-      <p className="mt-2 text-xs text-muted-foreground">
+      <p className="mt-2 text-sm text-muted-foreground">
         {description}
       </p>
     </div>

@@ -41,7 +41,7 @@ export function QuickActions() {
           // ACTIONS
         </p>
 
-        <h2 className="pixel mt-2 text-xl font-bold">
+        <h2 className="mt-2 text-xl font-bold tracking-tight">
           QUICK ACTIONS
         </h2>
 

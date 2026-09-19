@@ -37,7 +37,7 @@ export function UpcomingAssignments() {
             // QUEST LOG
           </p>
 
-          <h2 className="pixel mt-2 text-xl font-bold">
+          <h2 className="mt-2 text-xl font-bold tracking-tight">
             UPCOMING WORK
           </h2>
 

@@ -295,6 +295,10 @@ header button:hover {
   transform: translate(-1px, -1px);
 }
 
+aside button:hover {
+  color: var(--primary) !important;
+}
+
 .dark body {
   background-image:
     linear-gradient(rgba(248, 242, 229, 0.035) 1px, transparent 1px),
