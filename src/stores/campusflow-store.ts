@@ -229,7 +229,7 @@ export const useCampusFlowStore = create<CampusFlowState>()(
         set((state) => ({
           assignments: state.assignments.map((item) =>
             item.id === id
-              ? { ...item, completed: !item.completed }
+              ? { ...item, completed: !("completed" in item && item.completed) }
               : item
           ),
         })),
@@ -252,13 +252,21 @@ export const useCampusFlowStore = create<CampusFlowState>()(
         })),
 
       toggleTask: (id) =>
-        set((state) => ({
-          tasks: state.tasks.map((item) =>
-            item.id === id
-              ? { ...item, completed: !item.completed }
-              : item
-          ),
-        })),
+  set((state) => ({
+    tasks: state.tasks.map((item) => {
+      if (item.id !== id) return item;
+
+      const completed = !item.completed;
+
+      return {
+        ...item,
+        completed,
+        status: completed
+          ? "Completed"
+          : "Pending",
+      };
+    }),
+  })),
 
       setSelectedDay: (day) =>
         set({

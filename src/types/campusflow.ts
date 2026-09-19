@@ -36,13 +36,22 @@ export type ScheduleOverride = {
 
 
 
-export type Task = {
+export type TaskPriority = "Low" | "Medium" | "High";
+
+export type TaskStatus =
+  | "Pending"
+  | "In Progress"
+  | "Completed";
+
+export interface Task {
   id: string;
   title: string;
+  description?: string;
+  priority: TaskPriority;
+  status: TaskStatus;
   dueDate?: string;
-  priority: "Low" | "Medium" | "High";
   completed: boolean;
-};
+}
 export type AssignmentStatus =
   | "Pending"
   | "In Progress"

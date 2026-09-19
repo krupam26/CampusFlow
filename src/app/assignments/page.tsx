@@ -4,41 +4,38 @@ import {
   CalendarDays,
   CheckCircle2,
   Clock3,
-  Plus,
+  Pencil,
+  Trash2,
 } from "lucide-react";
-import { AppShell } from "@/components/layout/app-shell";
 
-const assignments = [
-  {
-    id: 1,
-    title: "FST Assignment 2",
-    subject: "Full Stack Development",
-    code: "FST",
-    due: "Sep 22",
-    status: "Pending",
-    priority: "High",
-  },
-  {
-    id: 2,
-    title: "ADSA Lab Assignment",
-    subject: "Advanced Data Structures",
-    code: "ADSA",
-    due: "Sep 24",
-    status: "Pending",
-    priority: "Medium",
-  },
-  {
-    id: 3,
-    title: "AIML Mini Project",
-    subject: "Artificial Intelligence & ML",
-    code: "AIML",
-    due: "Sep 28",
-    status: "In Progress",
-    priority: "High",
-  },
-];
+import { AppShell } from "@/components/layout/app-shell";
+import { AddAssignmentDialog } from "@/components/assignments/add-assignment-dialog";
+import { useCampusFlowStore } from "@/stores/campusflow-store";
+import type { Assignment } from "@/types/campusflow";
 
 export default function AssignmentsPage() {
+  const assignments = useCampusFlowStore(
+    (state) => state.assignments
+  );
+
+  const deleteAssignment = useCampusFlowStore(
+    (state) => state.deleteAssignment
+  );
+
+  const sortedAssignments = [...assignments].sort(
+    (a, b) =>
+      new Date(a.dueDate).getTime() -
+      new Date(b.dueDate).getTime()
+  );
+
+  const pending = assignments.filter(
+    (item) => item.status !== "Completed"
+  ).length;
+
+  const completed = assignments.filter(
+    (item) => item.status === "Completed"
+  ).length;
+
   return (
     <AppShell>
       <main className="min-h-screen bg-background p-4 md:p-6 lg:p-8">
@@ -56,15 +53,11 @@ export default function AssignmentsPage() {
               </h1>
 
               <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-                Keep track of upcoming submissions, deadlines and
-                coursework in one place.
+                Keep track of submissions, deadlines and coursework.
               </p>
             </div>
 
-            <button className="pixel-button pixel-border inline-flex h-10 items-center justify-center gap-2 bg-primary px-4 text-xs font-semibold text-primary-foreground">
-              <Plus className="h-4 w-4" />
-              ADD ASSIGNMENT
-            </button>
+            <AddAssignmentDialog />
           </section>
 
           {/* SUMMARY */}
@@ -77,26 +70,18 @@ export default function AssignmentsPage() {
 
             <SummaryCard
               label="PENDING"
-              value={
-                assignments.filter(
-                  (item) => item.status !== "Completed"
-                ).length
-              }
+              value={pending}
               icon={Clock3}
             />
 
             <SummaryCard
               label="COMPLETED"
-              value={
-                assignments.filter(
-                  (item) => item.status === "Completed"
-                ).length
-              }
+              value={completed}
               icon={CheckCircle2}
             />
           </section>
 
-          {/* ASSIGNMENT LIST */}
+          {/* LIST */}
           <section>
             <div className="mb-4">
               <p className="pixel text-xs text-primary">
@@ -108,14 +93,31 @@ export default function AssignmentsPage() {
               </h2>
             </div>
 
-            <div className="space-y-3">
-              {assignments.map((assignment) => (
-                <AssignmentCard
-                  key={assignment.id}
-                  assignment={assignment}
-                />
-              ))}
-            </div>
+            {sortedAssignments.length === 0 ? (
+              <div className="pixel-border-subtle flex min-h-48 flex-col items-center justify-center bg-card text-center">
+                <CalendarDays className="mb-3 h-7 w-7 text-muted-foreground" />
+
+                <p className="pixel text-sm">
+                  NO ASSIGNMENTS YET
+                </p>
+
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Add your first assignment to get started.
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {sortedAssignments.map((assignment) => (
+                  <AssignmentCard
+                    key={assignment.id}
+                    assignment={assignment}
+                    onDelete={() =>
+                      deleteAssignment(assignment.id)
+                    }
+                  />
+                ))}
+              </div>
+            )}
           </section>
         </div>
       </main>
@@ -155,36 +157,32 @@ function SummaryCard({
 
 function AssignmentCard({
   assignment,
+  onDelete,
 }: {
-  assignment: {
-    id: number;
-    title: string;
-    subject: string;
-    code: string;
-    due: string;
-    status: string;
-    priority: string;
-  };
+  assignment: Assignment;
+  onDelete: () => void;
 }) {
   const priorityClass =
     assignment.priority === "High"
       ? "border-destructive/30 bg-destructive/10 text-destructive"
-      : "border-warning/30 bg-warning/10 text-warning";
+      : assignment.priority === "Medium"
+        ? "border-warning/30 bg-warning/10 text-warning"
+        : "border-success/30 bg-success/10 text-success";
 
   return (
-    <div className="pixel-border-subtle bg-card p-5 transition-all hover:-translate-y-0.5 hover:shadow-[3px_3px_0px_hsl(var(--primary))]">
+    <div className="pixel-border-subtle bg-card p-5">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
 
         <div className="min-w-0">
           <div className="flex flex-wrap items-center gap-2">
             <span className="pixel text-[10px] text-primary">
-              {assignment.code}
+              {assignment.code || "ACADEMIC"}
             </span>
 
             <span
               className={`border px-2 py-0.5 text-[10px] ${priorityClass}`}
             >
-              {assignment.priority} PRIORITY
+              {assignment.priority.toUpperCase()} PRIORITY
             </span>
           </div>
 
@@ -195,9 +193,15 @@ function AssignmentCard({
           <p className="mt-1 text-xs text-muted-foreground">
             {assignment.subject}
           </p>
+
+          {assignment.description && (
+            <p className="mt-2 text-xs text-muted-foreground">
+              {assignment.description}
+            </p>
+          )}
         </div>
 
-        <div className="flex items-center gap-5">
+        <div className="flex flex-wrap items-center gap-3">
           <div>
             <p className="pixel text-[10px] text-muted-foreground">
               DUE
@@ -205,15 +209,33 @@ function AssignmentCard({
 
             <p className="mt-1 flex items-center gap-1.5 text-sm">
               <CalendarDays className="h-3.5 w-3.5 text-primary" />
-              {assignment.due}
+              {assignment.dueDate}
             </p>
           </div>
 
           <span className="border border-border bg-muted px-3 py-1.5 text-[10px]">
             {assignment.status.toUpperCase()}
           </span>
-        </div>
 
+          <AddAssignmentDialog
+            assignment={assignment}
+            trigger={
+              <>
+                <Pencil className="h-3.5 w-3.5" />
+                EDIT
+              </>
+            }
+          />
+
+          <button
+            type="button"
+            onClick={onDelete}
+            className="pixel-border-subtle flex h-9 items-center gap-2 bg-destructive/10 px-3 text-xs text-destructive transition-all hover:-translate-y-0.5 hover:bg-destructive/20"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+            DELETE
+          </button>
+        </div>
       </div>
     </div>
   );
