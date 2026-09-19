@@ -114,45 +114,83 @@ export function AddAssignmentDialog({
     };
   }, [open]);
 
-  function onSubmit(data: AssignmentFormValues) {
-    if (assignment) {
-      updateAssignment(assignment.id, {
-        title: data.title,
-        subject: data.subject,
-        code: data.code,
-        dueDate: data.dueDate,
-        priority:
-          data.priority as AssignmentPriority,
-        status:
-          data.status as AssignmentStatus,
-        description: data.description,
-        completed: data.status === "Completed",
-      });
+  const deleteAssignment = useCampusFlowStore(
+  (state) => state.deleteAssignment
+);
+
+  async function onSubmit(
+  data: AssignmentFormValues
+) {
+  const optimisticId =
+    assignment?.id ?? crypto.randomUUID();
+
+  const previousAssignment = assignment
+    ? { ...assignment }
+    : null;
+
+  // Optimistic update
+  if (assignment) {
+    updateAssignment(assignment.id, {
+      title: data.title,
+      subject: data.subject,
+      code: data.code,
+      dueDate: data.dueDate,
+      priority:
+        data.priority as AssignmentPriority,
+      status:
+        data.status as AssignmentStatus,
+      description: data.description,
+      completed: data.status === "Completed",
+    });
+  } else {
+    addAssignment({
+      id: optimisticId,
+      title: data.title,
+      subject: data.subject,
+      code: data.code,
+      dueDate: data.dueDate,
+      priority:
+        data.priority as AssignmentPriority,
+      status:
+        data.status as AssignmentStatus,
+      description: data.description,
+      completed: data.status === "Completed",
+    });
+  }
+
+  const result = await saveAssignment(data);
+
+  if (!result.success) {
+    if (assignment && previousAssignment) {
+      updateAssignment(
+        assignment.id,
+        previousAssignment
+      );
     } else {
-      addAssignment({
-        id: crypto.randomUUID(),
-        title: data.title,
-        subject: data.subject,
-        code: data.code,
-        dueDate: data.dueDate,
-        priority:
-          data.priority as AssignmentPriority,
-        status:
-          data.status as AssignmentStatus,
-        description: data.description,
-        completed: data.status === "Completed",
-      });
+      deleteAssignment(optimisticId);
     }
 
-    setOpen(false);
+    toast.error(result.message);
+    return;
   }
+
+  toast.success(
+    assignment
+      ? "Assignment updated successfully."
+      : "Assignment created successfully."
+  );
+
+  setOpen(false);
+}
 
   const button = (
     <button
       type="button"
       onClick={() => setOpen(true)}
       className={
-        assignment
+        trigger
+          ? "block w-full p-0 text-left"
+          : assignment
           ? "pixel-border-subtle flex h-9 items-center gap-2 bg-muted px-3 text-xs transition-all hover:-translate-y-0.5"
           : "pixel-button pixel-border inline-flex h-10 items-center justify-center gap-2 bg-primary px-4 text-xs font-semibold text-primary-foreground"
       }
@@ -184,7 +222,7 @@ export function AddAssignmentDialog({
       {typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+            className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(event) => {
               if (
                 event.target ===

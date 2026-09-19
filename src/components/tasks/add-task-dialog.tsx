@@ -1,5 +1,7 @@
 "use client";
+import { toast } from "sonner";
 
+import { saveTask } from "@/app/actions/task-actions";
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Pencil, Plus, X } from "lucide-react";
@@ -105,40 +107,82 @@ export function AddTaskDialog({
       document.body.style.overflow = "";
     };
   }, [open]);
+  const deleteTask = useCampusFlowStore(
+  (state) => state.deleteTask
+);
 
-  function onSubmit(data: TaskFormValues) {
-    const completed = data.status === "Completed";
+  async function onSubmit(
+  data: TaskFormValues
+) {
+  const optimisticId =
+    task?.id ?? crypto.randomUUID();
 
-    if (task) {
-      updateTask(task.id, {
-        title: data.title,
-        dueDate: data.dueDate,
-        priority: data.priority as TaskPriority,
-        status: data.status as TaskStatus,
-        description: data.description,
-        completed,
-      });
+  const previousTask = task
+    ? { ...task }
+    : null;
+
+  const completed =
+    data.status === "Completed";
+
+  // Optimistic update
+  if (task) {
+    updateTask(task.id, {
+      title: data.title,
+      dueDate: data.dueDate,
+      priority:
+        data.priority as TaskPriority,
+      status:
+        data.status as TaskStatus,
+      description: data.description,
+      completed,
+    });
+  } else {
+    addTask({
+      id: optimisticId,
+      title: data.title,
+      dueDate: data.dueDate,
+      priority:
+        data.priority as TaskPriority,
+      status:
+        data.status as TaskStatus,
+      description: data.description,
+      completed,
+    });
+  }
+
+  const result = await saveTask(data);
+
+  if (!result.success) {
+    if (task && previousTask) {
+      updateTask(
+        task.id,
+        previousTask
+      );
     } else {
-      addTask({
-        id: crypto.randomUUID(),
-        title: data.title,
-        dueDate: data.dueDate,
-        priority: data.priority as TaskPriority,
-        status: data.status as TaskStatus,
-        description: data.description,
-        completed,
-      });
+      deleteTask(optimisticId);
     }
 
-    setOpen(false);
+    toast.error(result.message);
+    return;
   }
+
+  toast.success(
+    task
+      ? "Task updated successfully."
+      : "Task created successfully."
+  );
+
+  setOpen(false);
+}
 
   const button = (
     <button
       type="button"
       onClick={() => setOpen(true)}
       className={
-        task
+        trigger
+          ? "block w-full p-0 text-left"
+          : task
           ? "pixel-border-subtle flex h-9 items-center gap-2 bg-muted px-3 text-xs transition-all hover:-translate-y-0.5"
           : "pixel-button pixel-border inline-flex h-10 items-center justify-center gap-2 bg-primary px-4 text-xs font-semibold text-primary-foreground"
       }
@@ -170,7 +214,7 @@ export function AddTaskDialog({
       {typeof document !== "undefined" &&
         createPortal(
           <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4"
+            className="fixed inset-0 z-9999 flex items-center justify-center bg-black/70 p-4"
             onMouseDown={(event) => {
               if (
                 event.target ===

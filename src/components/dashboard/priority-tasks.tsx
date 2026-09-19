@@ -1,50 +1,35 @@
 "use client";
 
+import { useMemo } from "react";
 import {
   Circle,
   Flag,
   Timer,
 } from "lucide-react";
-import { useState } from "react";
-
-const tasks = [
-  {
-    title: "Finish FST Assignment 5",
-    time: "45 MIN",
-    priority: "HIGH",
-    xp: "+50 XP",
-  },
-  {
-    title: "Prepare CN lab notes",
-    time: "30 MIN",
-    priority: "MEDIUM",
-    xp: "+30 XP",
-  },
-  {
-    title: "Review ML lecture",
-    time: "20 MIN",
-    priority: "LOW",
-    xp: "+20 XP",
-  },
-];
+import { AddTaskDialog } from "@/components/tasks/add-task-dialog";
+import { useCampusFlowStore } from "@/stores/campusflow-store";
 
 export function PriorityTasks() {
-  const [completedTasks, setCompletedTasks] = useState<string[]>([]);
-
-  const toggleTask = (title: string) => {
-    setCompletedTasks((current) =>
-      current.includes(title)
-        ? current.filter((task) => task !== title)
-        : [...current, title],
-    );
-  };
+  const allTasks = useCampusFlowStore((state) => state.tasks);
+  const tasks = useMemo(
+    () =>
+      [...allTasks]
+      .filter((task) => !task.completed)
+      .sort((a, b) => {
+        const priorityRank = { High: 0, Medium: 1, Low: 2 };
+        return priorityRank[a.priority] - priorityRank[b.priority];
+      })
+      .slice(0, 3),
+    [allTasks]
+  );
+  const toggleTask = useCampusFlowStore((state) => state.toggleTask);
 
   return (
     <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="pixel text-[10px] text-primary">
-            // TODAY
+              {"// TODAY"}
           </p>
 
           <h2 className="mt-2 text-xl font-bold tracking-tight">
@@ -64,49 +49,54 @@ export function PriorityTasks() {
       <div className="space-y-2">
         {tasks.map((task, index) => (
           <div
-            key={task.title}
-            className={`flex items-center gap-3 rounded-xl border-2 p-3.5 transition-all hover:bg-muted/50 ${completedTasks.includes(task.title) ? "border-success/50 bg-success/10" : ""}`}
+            key={task.id}
+            className="flex items-center gap-3 rounded-xl border-2 p-3.5 transition-all hover:bg-muted/50"
           >
             <span className="pixel flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-muted text-[10px]">
               0{index + 1}
             </span>
 
             <button
-              onClick={() => toggleTask(task.title)}
-              className={`shrink-0 ${completedTasks.includes(task.title) ? "text-success" : "text-muted-foreground hover:text-primary"}`}
+              onClick={() => toggleTask(task.id)}
+              className="shrink-0 text-muted-foreground hover:text-primary"
               aria-label={`Complete ${task.title}`}
-              aria-pressed={completedTasks.includes(task.title)}
+              aria-pressed={false}
             >
-              <Circle className={`h-5 w-5 ${completedTasks.includes(task.title) ? "fill-success/20" : ""}`} />
+              <Circle className="h-5 w-5" />
             </button>
 
             <div className="min-w-0 flex-1">
-              <p className={`truncate text-sm font-bold ${completedTasks.includes(task.title) ? "text-muted-foreground line-through" : ""}`}>
+              <p className="truncate text-sm font-bold">
                 {task.title}
               </p>
 
               <div className="mt-1 flex items-center gap-2 text-[10px] text-muted-foreground">
                 <Timer className="h-3 w-3" />
-                {task.time}
+                {task.dueDate ? `DUE ${task.dueDate}` : "NO DUE DATE"}
               </div>
             </div>
 
             <div className="hidden text-right sm:block">
               <p className="pixel text-[8px] text-primary">
-                {task.xp}
+                {task.priority}
               </p>
 
               <p className="pixel mt-1 text-[8px] text-muted-foreground">
-                {task.priority}
+                PENDING
               </p>
             </div>
           </div>
         ))}
       </div>
 
-      <button className="pixel mt-4 w-full rounded-lg border-2 border-dashed py-3 text-[10px] text-muted-foreground hover:bg-muted">
-        + ADD NEW QUEST
-      </button>
+      <AddTaskDialog
+        trigger={
+          <span className="pixel mt-4 flex w-full items-center justify-center gap-2 rounded-lg border-2 border-dashed border-primary/40 bg-primary/5 py-3 text-xs font-semibold text-primary transition-colors hover:bg-primary/10">
+            <span className="text-base leading-none">+</span>
+            ADD NEW QUEST
+          </span>
+        }
+      />
     </section>
   );
 }

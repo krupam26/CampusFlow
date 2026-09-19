@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import {
   CheckCircle2,
   Clock3,
@@ -34,6 +35,17 @@ export default function AssignmentsPage() {
   const toggleAssignment = useCampusFlowStore(
     (state) => state.toggleAssignment
   );
+
+  function handleDeleteAssignment(assignment: Assignment) {
+    const confirmed = window.confirm(
+      `Delete "${assignment.title}"? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    deleteAssignment(assignment.id);
+    toast.success("Assignment deleted successfully.");
+  }
 
   const completed = assignments.filter(
     (assignment) =>
@@ -169,7 +181,7 @@ export default function AssignmentsPage() {
                       toggleAssignment(assignment.id)
                     }
                     onDelete={() =>
-                      deleteAssignment(assignment.id)
+                      handleDeleteAssignment(assignment)
                     }
                   />
                 ))}

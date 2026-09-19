@@ -5,7 +5,6 @@ import { TodaysClasses } from "@/components/dashboard/todays-classes";
 import { UpcomingAssignments } from "@/components/dashboard/upcoming-assignments";
 import { PriorityTasks } from "@/components/dashboard/priority-tasks";
 import { QuickActions } from "@/components/dashboard/quick-actions";
-import { XPCard } from "@/components/dashboard/xp-card";
 
 
 export default function Home() {
@@ -30,9 +29,6 @@ export default function Home() {
 
             <QuickActions />
           </div>
-
-          {/* PROGRESS */}
-          <XPCard />
 
           {/* AI */}
           <section className="relative overflow-hidden rounded-2xl border-2 border-primary/35 bg-primary/[0.055] p-6 sm:p-7">

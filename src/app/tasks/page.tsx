@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import {
   CheckCircle2,
   Circle,
@@ -25,6 +26,17 @@ export default function TasksPage() {
   const toggleTask = useCampusFlowStore(
     (state) => state.toggleTask
   );
+
+  function handleDeleteTask(task: Task) {
+    const confirmed = window.confirm(
+      `Delete "${task.title}"? This cannot be undone.`
+    );
+
+    if (!confirmed) return;
+
+    deleteTask(task.id);
+    toast.success("Task deleted successfully.");
+  }
 
   const completed = tasks.filter(
     (task) => task.completed
@@ -123,7 +135,7 @@ export default function TasksPage() {
                       toggleTask(task.id)
                     }
                     onDelete={() =>
-                      deleteTask(task.id)
+                      handleDeleteTask(task)
                     }
                   />
                 ))}

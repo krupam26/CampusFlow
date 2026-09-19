@@ -1,40 +1,37 @@
+"use client";
+
+import { useMemo } from "react";
 import {
   ArrowUpRight,
   CalendarClock,
   CheckCircle2,
 } from "lucide-react";
+import Link from "next/link";
 
-const assignments = [
-  {
-    title: "FST Assignment 5",
-    subject: "Full Stack Development",
-    due: "TOMORROW",
-    priority: "HIGH",
-    progress: 65,
-  },
-  {
-    title: "CN Lab Report",
-    subject: "Computer Networks",
-    due: "FRIDAY",
-    priority: "MEDIUM",
-    progress: 30,
-  },
-  {
-    title: "ML Research Summary",
-    subject: "Machine Learning",
-    due: "MONDAY",
-    priority: "LOW",
-    progress: 80,
-  },
-];
+import { useCampusFlowStore } from "@/stores/campusflow-store";
 
 export function UpcomingAssignments() {
+  const allAssignments = useCampusFlowStore(
+    (state) => state.assignments
+  );
+  const assignments = useMemo(
+    () =>
+      [...allAssignments]
+      .filter((assignment) => !assignment.completed && assignment.status !== "Completed")
+      .sort(
+        (a, b) =>
+          new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      )
+      .slice(0, 3),
+    [allAssignments]
+  );
+
   return (
     <section className="rounded-2xl border-2 bg-card p-5 shadow-[4px_4px_0_rgba(24,24,31,0.06)] sm:p-6">
       <div className="mb-5 flex items-center justify-between">
         <div>
           <p className="pixel text-[10px] text-primary">
-            // QUEST LOG
+              {"// QUEST LOG"}
           </p>
 
           <h2 className="mt-2 text-xl font-bold tracking-tight">
@@ -46,9 +43,9 @@ export function UpcomingAssignments() {
           </p>
         </div>
 
-        <button className="pixel text-[10px] text-primary hover:underline">
+        <Link href="/assignments" className="pixel text-[10px] text-primary hover:underline">
           VIEW ALL →
-        </button>
+        </Link>
       </div>
 
       <div className="space-y-3">
@@ -59,7 +56,7 @@ export function UpcomingAssignments() {
           >
             <div className="flex gap-3">
               <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <CheckCircle2 className="h-[18px] w-[18px]" />
+                <CheckCircle2 className="h-4.5 w-4.5" />
               </div>
 
               <div className="min-w-0 flex-1">
@@ -80,43 +77,23 @@ export function UpcomingAssignments() {
                 <div className="mt-4 flex items-center justify-between">
                   <span className="flex items-center gap-1.5 text-[10px] text-muted-foreground">
                     <CalendarClock className="h-3.5 w-3.5" />
-                    DUE {assignment.due}
+                    DUE {assignment.dueDate}
                   </span>
 
                   <span
                     className={[
                       "pixel text-[9px]",
-                      assignment.priority === "HIGH"
+                      assignment.priority === "High"
                         ? "text-danger"
-                        : assignment.priority === "MEDIUM"
+                        : assignment.priority === "Medium"
                           ? "text-yellow-600"
                           : "text-muted-foreground",
                     ].join(" ")}
                   >
-                    {assignment.priority}
+                    {assignment.priority.toUpperCase()}
                   </span>
                 </div>
 
-                <div className="mt-3">
-                  <div className="mb-1.5 flex justify-between">
-                    <span className="pixel text-[8px] text-muted-foreground">
-                      PROGRESS
-                    </span>
-
-                    <span className="pixel text-[8px]">
-                      {assignment.progress}%
-                    </span>
-                  </div>
-
-                  <div className="h-2 border border-border bg-muted">
-                    <div
-                      className="h-full bg-primary"
-                      style={{
-                        width: `${assignment.progress}%`,
-                      }}
-                    />
-                  </div>
-                </div>
               </div>
             </div>
           </div>
