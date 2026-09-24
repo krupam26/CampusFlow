@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { AppShell } from "@/components/layout/app-shell";
 
 import { MorningBriefing } from "@/components/dashboard/morning-briefing";
@@ -53,9 +55,12 @@ export default function Home() {
                 </div>
               </div>
 
-              <button className="pixel-button w-fit rounded-lg border-2 border-primary bg-primary px-5 py-3 text-[10px] font-bold text-white shadow-[4px_4px_0_var(--foreground)]">
+              <Link
+                href="/ai"
+                className="pixel-button w-fit rounded-lg border-2 border-primary bg-primary px-5 py-3 text-[10px] font-bold text-white shadow-[4px_4px_0_var(--foreground)]"
+              >
                 OPEN AI ASSISTANT →
-              </button>
+              </Link>
             </div>
           </section>
 

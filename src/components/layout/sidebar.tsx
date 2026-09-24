@@ -219,9 +219,13 @@ export function Sidebar({
             or what you should work on next.
           </p>
 
-          <button className="mt-3 text-[10px] text-primary hover:text-primary/80">
+          <Link
+            href="/ai"
+            onClick={onClose}
+            className="mt-3 inline-block text-[10px] text-primary hover:text-primary/80"
+          >
             [ ASK CAMPUS AI ]
-          </button>
+          </Link>
         </div>
       </div>
 
