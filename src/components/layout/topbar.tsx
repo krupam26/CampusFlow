@@ -8,8 +8,11 @@ import {
   Menu,
   Search,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
 
 import { ThemeToggle } from "./theme-toggle";
+import { authClient } from "@/lib/auth-client";
 import { getNotificationIds } from "@/lib/notifications";
 import { useCampusFlowStore } from "@/stores/campusflow-store";
 
@@ -18,6 +21,8 @@ type TopbarProps = {
 };
 
 export function Topbar({ onMenuClick }: TopbarProps) {
+  const router = useRouter();
+  const [isSigningOut, setIsSigningOut] = useState(false);
   const assignments = useCampusFlowStore(
     (state) => state.assignments
   );
@@ -33,6 +38,18 @@ export function Topbar({ onMenuClick }: TopbarProps) {
     tasks,
     overrides
   ).some((id) => !readNotificationIds.includes(id));
+
+  const handleSignOut = async () => {
+    setIsSigningOut(true);
+
+    try {
+      await authClient.signOut();
+      router.replace("/login");
+      router.refresh();
+    } finally {
+      setIsSigningOut(false);
+    }
+  };
 
   return (
     <header className="flex h-[78px] items-center justify-between border-b bg-background px-5 sm:px-7 lg:px-9">
@@ -93,7 +110,13 @@ export function Topbar({ onMenuClick }: TopbarProps) {
             <p className="pixel mt-1 text-[8px] text-muted-foreground">AIML · LVL 12</p>
           </div>
 
-          <button className="ml-1 hidden text-muted-foreground hover:text-primary lg:block" aria-label="Open profile menu">
+          <button
+            onClick={handleSignOut}
+            disabled={isSigningOut}
+            className="ml-1 hidden text-muted-foreground hover:text-primary disabled:cursor-wait disabled:opacity-50 lg:block"
+            aria-label="Log out"
+            title="Log out"
+          >
             <LogOut className="h-3.5 w-3.5 rotate-180" />
           </button>
         </div>

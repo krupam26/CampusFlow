@@ -1,6 +1,9 @@
 import Link from "next/link";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
 
 import { AppShell } from "@/components/layout/app-shell";
+import { auth } from "@/lib/auth";
 
 import { MorningBriefing } from "@/components/dashboard/morning-briefing";
 import { TodaysClasses } from "@/components/dashboard/todays-classes";
@@ -9,7 +12,15 @@ import { PriorityTasks } from "@/components/dashboard/priority-tasks";
 import { QuickActions } from "@/components/dashboard/quick-actions";
 
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth.api.getSession({
+    headers: await headers(),
+  });
+
+  if (!session) {
+    redirect("/login");
+  }
+
   return (
     <AppShell>
       <div className="pixel-canvas min-h-full">
