@@ -5,6 +5,7 @@ import { useState } from "react";
 import { Sidebar } from "./sidebar";
 import { Topbar } from "./topbar";
 import { NotificationToast } from "./notification-toast";
+import { OnboardingDialog } from "@/components/onboarding-dialog";
 
 export function AppShell({
   children,
@@ -41,6 +42,7 @@ export function AppShell({
         </div>
 
         <NotificationToast />
+        <OnboardingDialog />
       </div>
     </div>
   );

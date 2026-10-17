@@ -1,6 +1,76 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+/* Landing page styles adapted from the supplied standalone design. */
+.font-pixel {
+  font-family: var(--font-pixel), monospace;
+  letter-spacing: -0.01em;
+}
+
+.font-pixel-title {
+  font-family: var(--font-pixel), monospace;
+  letter-spacing: -0.02em;
+}
+
+.graph-paper-pattern {
+  background-color: #f6f2ec;
+  background-image:
+    linear-gradient(to right, rgba(0, 0, 0, 0.04) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(0, 0, 0, 0.04) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.graph-paper-card {
+  background-color: #fbf9f5;
+  border: 1px solid #e8e2d8;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.graph-paper-card:hover {
+  border-color: #d8d0c2;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.05);
+}
+
+.dark-grid-pattern {
+  background-color: #0d1a26;
+  background-image:
+    linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.liquid-glass {
+  background: rgba(255, 255, 255, 0.02);
+  background-blend-mode: luminosity;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  position: relative;
+  overflow: hidden;
+}
+
+.liquid-glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1.2px;
+  background: linear-gradient(180deg, rgba(255,255,255,.4), rgba(255,255,255,.12) 25%, transparent 50%, rgba(255,255,255,.12) 75%, rgba(255,255,255,.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+@keyframes fade-rise {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-rise { animation: fade-rise 0.8s ease-out both; }
+.animate-fade-rise-delay { animation: fade-rise 0.8s ease-out 0.2s both; }
+.animate-fade-rise-delay-2 { animation: fade-rise 0.8s ease-out 0.4s both; }
+
 @custom-variant dark (&:is(.dark *));
 
 :root {

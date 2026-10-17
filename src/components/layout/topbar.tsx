@@ -30,13 +30,18 @@ export function Topbar({ onMenuClick }: TopbarProps) {
   const overrides = useCampusFlowStore(
     (state) => state.overrides
   );
+  const timetable = useCampusFlowStore((state) => state.timetable);
+  const daySwaps = useCampusFlowStore((state) => state.daySwaps || []);
   const readNotificationIds = useCampusFlowStore(
     (state) => state.readNotificationIds
   );
   const hasUnreadNotifications = getNotificationIds(
     assignments,
     tasks,
-    overrides
+    overrides,
+    new Date(),
+    timetable,
+    daySwaps
   ).some((id) => !readNotificationIds.includes(id));
 
   const handleSignOut = async () => {

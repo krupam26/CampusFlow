@@ -1,15 +1,20 @@
 "use client";
 
+import { UploadTimetableDialog } from "@/components/timetable/upload-timetable-dialog";
+import { SwapDayDialog } from "@/components/timetable/swap-day-dialog";
 import { useMemo, useState } from "react";
 import {
   CalendarDays,
   Clock3,
   MapPin,
   Pencil,
+  Plus,
   Trash2,
   AlertTriangle,
+  ArrowLeftRight,
 } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { AddClassDialog } from "@/components/timetable/add-class-dialog";
 import { AddOverrideDialog } from "@/components/timetable/add-override-dialog";
 import { AppShell } from "@/components/layout/app-shell";
@@ -71,8 +76,16 @@ export default function TimetablePage() {
     (state) => state.overrides
   );
 
+  const daySwaps = useCampusFlowStore(
+    (state) => state.daySwaps || []
+  );
+
   const deleteClass = useCampusFlowStore(
     (state) => state.deleteClass
+  );
+
+  const deleteDaySwap = useCampusFlowStore(
+    (state) => state.deleteDaySwap
   );
 
   const [selectedDate, setSelectedDate] = useState(
@@ -83,17 +96,25 @@ export default function TimetablePage() {
     new Date(`${selectedDate}T12:00:00`)
   );
 
+  const activeSwap = daySwaps.find(
+    (swap) => swap.date === selectedDate
+  );
+
+  const effectiveDay = activeSwap
+    ? activeSwap.sourceDay
+    : selectedDay;
+
   const normalClasses = useMemo(() => {
-    if (!selectedDay) {
+    if (!effectiveDay) {
       return [];
     }
 
     return timetable
-      .filter((item) => item.day === selectedDay)
+      .filter((item) => item.day === effectiveDay)
       .sort((a, b) =>
         a.startTime.localeCompare(b.startTime)
       );
-  }, [timetable, selectedDay]);
+  }, [timetable, effectiveDay]);
 
   const dateOverrides = useMemo(() => {
     return overrides.filter(
@@ -189,42 +210,113 @@ export default function TimetablePage() {
                 </p>
               </div>
 
-              <div className="flex flex-col gap-3 xl:flex-row xl:items-end">
+              <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-end">
 
-                {/* DATE */}
-                <div className="pixel-border-subtle rounded-lg bg-muted px-4 py-3">
-                  <label className="pixel mb-1 block text-[10px] text-muted-foreground">
-                    VIEW DATE
-                  </label>
+                {/* LEFT: VIEW DATE & THIS WEEK BOXES */}
+                <div className="flex items-center gap-3">
+                  {/* VIEW DATE */}
+                  <div className="pixel-border-subtle rounded-lg bg-muted px-4 py-2.5">
+                    <label className="pixel mb-1 block text-[10px] text-muted-foreground">
+                      VIEW DATE
+                    </label>
 
-                  <input
-                    type="date"
-                    value={selectedDate}
-                    onChange={(event) =>
-                      setSelectedDate(
-                        event.target.value
-                      )
-                    }
-                    className="h-9 rounded-md border border-input bg-background px-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-                  />
+                    <input
+                      type="date"
+                      value={selectedDate}
+                      onChange={(event) =>
+                        setSelectedDate(
+                          event.target.value
+                        )
+                      }
+                      className="h-9 rounded-md border border-input bg-background px-2 text-sm outline-none focus:ring-2 focus:ring-primary"
+                    />
+                  </div>
+
+                  {/* THIS WEEK COUNT */}
+                  <div className="pixel-border-subtle rounded-lg bg-muted px-4 py-2.5 min-w-[110px]">
+                    <p className="pixel text-xs text-muted-foreground">
+                      THIS WEEK
+                    </p>
+
+                    <p className="mt-1 font-bold text-base">
+                      {timetable.length} CLASSES
+                    </p>
+                  </div>
                 </div>
 
-                {/* COUNT */}
-                <div className="pixel-border-subtle rounded-lg bg-muted px-4 py-3">
-                  <p className="pixel text-xs text-muted-foreground">
-                    THIS WEEK
-                  </p>
+                {/* RIGHT: ACTION BUTTONS (SWAP DAY & UPLOAD TIMETABLE ABOVE ADD CLASS) */}
+                <div className="flex flex-col gap-2">
+                  {/* Top row: Swap Day + Upload Timetable */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    <SwapDayDialog
+                      selectedDate={selectedDate}
+                      onDateChange={setSelectedDate}
+                    />
+                    <UploadTimetableDialog
+                      onImportSuccess={(firstDay) => {
+                        const current = new Date(`${selectedDate}T12:00:00`);
+                        const target = days.indexOf(firstDay);
+                        const monday = new Date(current);
+                        const currentDay = monday.getDay();
+                        const diff = currentDay === 0 ? -6 : 1 - currentDay;
+                        monday.setDate(monday.getDate() + diff);
+                        monday.setDate(monday.getDate() + (target >= 0 ? target : 0));
+                        setSelectedDate(formatDateKey(monday));
+                      }}
+                    />
+                  </div>
 
-                  <p className="mt-1 font-bold">
-                    {timetable.length} CLASSES
-                  </p>
+                  {/* Below: Add Class button */}
+                  <div className="w-full">
+                    <AddClassDialog
+                      trigger={
+                        <Button className="pixel-button h-10 w-full gap-2 font-semibold">
+                          <Plus className="h-4 w-4" />
+                          ADD CLASS
+                        </Button>
+                      }
+                    />
+                  </div>
                 </div>
-
-                <AddClassDialog />
 
               </div>
             </div>
           </section>
+
+          {/* ACTIVE DAY SWAP BANNER */}
+          {activeSwap && (
+            <div className="pixel-border-subtle flex flex-col gap-3 rounded-lg border border-primary/40 bg-primary/10 p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3 text-xs">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-primary text-primary-foreground">
+                  <ArrowLeftRight className="h-4 w-4" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="font-bold text-primary">DAY SWAP ACTIVE</span>
+                    <span className="rounded bg-primary/20 px-2 py-0.5 text-[10px] font-semibold text-primary">
+                      FOLLOWING {activeSwap.sourceDay.toUpperCase()}
+                    </span>
+                  </div>
+                  <p className="mt-0.5 text-foreground">
+                    Showing <strong>{activeSwap.sourceDay}&apos;s</strong> timetable for this {selectedDay} ({selectedDate}).
+                  </p>
+                  {activeSwap.note && (
+                    <p className="text-[11px] text-muted-foreground mt-0.5">
+                      Note: {activeSwap.note}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => deleteDaySwap(activeSwap.id)}
+                className="pixel-border-subtle shrink-0 rounded bg-card px-3 py-1.5 text-xs font-semibold text-destructive transition-all hover:bg-destructive/10"
+              >
+                RESTORE REGULAR SCHEDULE
+              </button>
+            </div>
+          )}
 
           {/* DATE INFO */}
           <div className="flex flex-wrap items-center gap-3">
@@ -242,6 +334,13 @@ export default function TimetablePage() {
             <span className="text-sm text-muted-foreground">
               {formatDateKey(selectedDate)}
             </span>
+
+            {activeSwap && (
+              <span className="pixel-border-subtle flex items-center gap-1.5 rounded-full bg-primary/20 px-3 py-1 text-xs font-semibold text-primary">
+                <ArrowLeftRight className="h-3 w-3" />
+                SWAPPED TO {activeSwap.sourceDay.toUpperCase()}
+              </span>
+            )}
 
             {dateOverrides.length > 0 && (
               <span className="pixel-border-subtle flex items-center gap-2 rounded-full bg-warning/15 px-3 py-1 text-xs font-semibold text-warning-foreground">
@@ -302,9 +401,20 @@ export default function TimetablePage() {
                       : "bg-card hover:bg-muted",
                   ].join(" ")}
                 >
-                  <p className="pixel text-xs">
-                    {day.slice(0, 3).toUpperCase()}
-                  </p>
+                  <div className="flex items-center justify-between">
+                    <p className="pixel text-xs">
+                      {day.slice(0, 3).toUpperCase()}
+                    </p>
+                    <span
+                      className={`text-[10px] font-bold px-1.5 py-0.2 rounded ${
+                        active
+                          ? "bg-primary-foreground/20 text-primary-foreground"
+                          : "bg-muted-foreground/15 text-muted-foreground"
+                      }`}
+                    >
+                      {timetable.filter((c) => c.day === day).length}
+                    </span>
+                  </div>
 
                   <p className="mt-1 text-xs font-semibold">
                     {day}
@@ -417,13 +527,46 @@ export default function TimetablePage() {
                   <CalendarDays className="mx-auto h-10 w-10 text-muted-foreground" />
 
                   <h3 className="pixel-heading mt-4 text-lg">
-                    NO CLASSES
+                    NO CLASSES SCHEDULED
                   </h3>
 
                   <p className="mt-2 text-sm text-muted-foreground">
-                    Nothing is scheduled for{" "}
-                    {formatDateKey(selectedDate)}.
+                    Nothing is scheduled for {selectedDay} ({formatDateKey(selectedDate)}).
                   </p>
+
+                  {timetable.length > 0 && (
+                    <div className="mt-6 border-t border-border pt-5">
+                      <p className="text-xs font-semibold text-muted-foreground">
+                        Your timetable has {timetable.length} classes scheduled on other days:
+                      </p>
+                      <div className="mt-3 flex flex-wrap justify-center gap-2">
+                        {days
+                          .filter((d) => timetable.some((c) => c.day === d))
+                          .map((d) => {
+                            const count = timetable.filter((c) => c.day === d).length;
+                            return (
+                              <button
+                                key={d}
+                                type="button"
+                                onClick={() => {
+                                  const current = new Date(`${selectedDate}T12:00:00`);
+                                  const target = days.indexOf(d);
+                                  const monday = new Date(current);
+                                  const currentDay = monday.getDay();
+                                  const diff = currentDay === 0 ? -6 : 1 - currentDay;
+                                  monday.setDate(monday.getDate() + diff);
+                                  monday.setDate(monday.getDate() + target);
+                                  setSelectedDate(formatDateKey(monday));
+                                }}
+                                className="pixel-border-subtle rounded-lg bg-primary/10 px-3.5 py-2 text-xs font-semibold text-primary transition-all hover:-translate-y-0.5 hover:bg-primary hover:text-primary-foreground"
+                              >
+                                View {d} ({count} {count === 1 ? "class" : "classes"})
+                              </button>
+                            );
+                          })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 

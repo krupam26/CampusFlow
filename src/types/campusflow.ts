@@ -34,6 +34,13 @@ export type ScheduleOverride = {
   action: "added" | "modified" | "cancelled";
 };
 
+export type DaySwap = {
+  id: string;
+  date: string; // YYYY-MM-DD
+  sourceDay: DayOfWeek; // The day's timetable to follow (e.g., "Tuesday")
+  note?: string;
+};
+
 
 
 export type TaskPriority = "Low" | "Medium" | "High";
@@ -72,4 +79,6 @@ export interface Assignment {
   priority: AssignmentPriority;
   completed?: boolean;
   description?: string;
+  source?: "manual" | "teams";
+  teamsWebUrl?: string;
 }

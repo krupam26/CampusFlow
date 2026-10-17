@@ -24,7 +24,7 @@ type SidebarProps = {
 const mainNav = [
   {
     name: "Overview",
-    href: "/",
+    href: "/dashboard",
     icon: LayoutDashboard,
   },
   {
@@ -119,7 +119,7 @@ export function Sidebar({
       {/* Navigation */}
       <div className="flex-1 overflow-y-auto px-4 py-6">
         <p className="mb-3 px-2 text-[10px] text-sidebar-muted">
-          // MAIN
+          {"// MAIN"}
         </p>
 
         <nav className="space-y-1.5">
@@ -172,7 +172,7 @@ export function Sidebar({
         <div className="my-7 border-t border-sidebar-border" />
 
         <p className="mb-3 px-2 text-[10px] text-sidebar-muted">
-          // TOOLS
+          {"// TOOLS"}
         </p>
 
         <nav className="space-y-1.5">

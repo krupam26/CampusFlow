@@ -5,6 +5,7 @@ import { persist } from "zustand/middleware";
 import type {
   Assignment,
   ClassItem,
+  DaySwap,
   ScheduleOverride,
   Task,
 } from "@/types/campusflow";
@@ -12,13 +13,17 @@ import type {
 type CampusFlowState = {
   timetable: ClassItem[];
   overrides: ScheduleOverride[];
+  daySwaps: DaySwap[];
   assignments: Assignment[];
   tasks: Task[];
   readNotificationIds: string[];
 
   selectedDay: string;
+  hasCompletedOnboarding: boolean;
 
   addClass: (classItem: ClassItem) => void;
+  addClasses: (classes: ClassItem[]) => void;
+  setTimetable: (classes: ClassItem[]) => void;
   updateClass: (id: string, classItem: Partial<ClassItem>) => void;
   deleteClass: (id: string) => void;
 
@@ -29,7 +34,11 @@ type CampusFlowState = {
   ) => void;
   deleteOverride: (id: string) => void;
 
+  addDaySwap: (swap: DaySwap) => void;
+  deleteDaySwap: (id: string) => void;
+
   addAssignment: (assignment: Assignment) => void;
+  syncAssignments: (incoming: Assignment[]) => void;
   updateAssignment: (
     id: string,
     assignment: Partial<Assignment>
@@ -44,130 +53,22 @@ type CampusFlowState = {
   markNotificationRead: (id: string) => void;
 
   setSelectedDay: (day: string) => void;
+  setHasCompletedOnboarding: (val: boolean) => void;
 
   resetStore: () => void;
 };
 
-const initialTimetable: ClassItem[] = [
-  {
-    id: "fst-1",
-    subject: "Full Stack Development",
-    code: "FST",
-    faculty: "Prof. Mehta",
-    room: "Lab 204",
-    day: "Monday",
-    startTime: "09:00",
-    endTime: "11:00",
-    type: "Lab",
-  },
-  {
-    id: "dsa-1",
-    subject: "Advanced Data Structures",
-    code: "ADSA",
-    faculty: "Prof. Shah",
-    room: "Room 302",
-    day: "Monday",
-    startTime: "11:15",
-    endTime: "12:15",
-    type: "Lecture",
-  },
-  {
-    id: "dbms-1",
-    subject: "Database Management Systems",
-    code: "DBMS",
-    faculty: "Prof. Patil",
-    room: "Room 401",
-    day: "Tuesday",
-    startTime: "09:00",
-    endTime: "10:00",
-    type: "Lecture",
-  },
-  {
-    id: "aiml-1",
-    subject: "Artificial Intelligence",
-    code: "AI",
-    faculty: "Prof. Kulkarni",
-    room: "Room 205",
-    day: "Tuesday",
-    startTime: "10:15",
-    endTime: "11:15",
-    type: "Lecture",
-  },
-  {
-    id: "os-1",
-    subject: "Operating Systems",
-    code: "OS",
-    faculty: "Prof. Joshi",
-    room: "Room 301",
-    day: "Wednesday",
-    startTime: "09:00",
-    endTime: "10:00",
-    type: "Lecture",
-  },
-  {
-    id: "maths-1",
-    subject: "Engineering Mathematics",
-    code: "MATHS",
-    faculty: "Prof. Desai",
-    room: "Room 202",
-    day: "Wednesday",
-    startTime: "11:00",
-    endTime: "12:00",
-    type: "Lecture",
-  },
-  {
-    id: "fst-2",
-    subject: "Full Stack Development",
-    code: "FST",
-    faculty: "Prof. Mehta",
-    room: "Lab 204",
-    day: "Thursday",
-    startTime: "11:00",
-    endTime: "13:00",
-    type: "Lab",
-  },
-  {
-    id: "dsa-2",
-    subject: "Advanced Data Structures",
-    code: "ADSA",
-    faculty: "Prof. Shah",
-    room: "Room 302",
-    day: "Thursday",
-    startTime: "14:00",
-    endTime: "15:00",
-    type: "Lecture",
-  },
-  {
-    id: "ai-2",
-    subject: "Artificial Intelligence",
-    code: "AI",
-    faculty: "Prof. Kulkarni",
-    room: "Room 205",
-    day: "Friday",
-    startTime: "09:00",
-    endTime: "10:00",
-    type: "Lecture",
-  },
-  {
-    id: "dbms-2",
-    subject: "Database Management Systems",
-    code: "DBMS",
-    faculty: "Prof. Patil",
-    room: "Room 401",
-    day: "Friday",
-    startTime: "11:00",
-    endTime: "12:00",
-    type: "Lecture",
-  },
-];
+const initialTimetable: ClassItem[] = [];
 
 const initialState = {
   timetable: initialTimetable,
   overrides: [],
+  daySwaps: [],
   assignments: [],
   tasks: [],
   readNotificationIds: [],
   selectedDay: "Monday",
+  hasCompletedOnboarding: false,
 };
 
 export const useCampusFlowStore = create<CampusFlowState>()(
@@ -178,6 +79,16 @@ export const useCampusFlowStore = create<CampusFlowState>()(
       addClass: (classItem) =>
         set((state) => ({
           timetable: [...state.timetable, classItem],
+        })),
+
+      addClasses: (classes) =>
+        set((state) => ({
+          timetable: [...state.timetable, ...classes],
+        })),
+
+      setTimetable: (classes) =>
+        set(() => ({
+          timetable: classes,
         })),
 
       updateClass: (id, classItem) =>
@@ -209,10 +120,39 @@ export const useCampusFlowStore = create<CampusFlowState>()(
           overrides: state.overrides.filter((item) => item.id !== id),
         })),
 
+      addDaySwap: (swap) =>
+        set((state) => ({
+          daySwaps: [
+            ...(state.daySwaps || []).filter((s) => s.date !== swap.date),
+            swap,
+          ],
+        })),
+
+      deleteDaySwap: (id) =>
+        set((state) => ({
+          daySwaps: (state.daySwaps || []).filter((s) => s.id !== id),
+        })),
+
       addAssignment: (assignment) =>
         set((state) => ({
           assignments: [...state.assignments, assignment],
         })),
+
+      syncAssignments: (incoming) =>
+        set((state) => {
+          const current = [...state.assignments];
+          for (const item of incoming) {
+            const existingIndex = current.findIndex(
+              (a) => a.id === item.id || (a.title.toLowerCase() === item.title.toLowerCase() && a.dueDate === item.dueDate)
+            );
+            if (existingIndex >= 0) {
+              current[existingIndex] = { ...current[existingIndex], ...item };
+            } else {
+              current.push(item);
+            }
+          }
+          return { assignments: current };
+        }),
 
       updateAssignment: (id, assignment) =>
         set((state) => ({
@@ -287,6 +227,11 @@ export const useCampusFlowStore = create<CampusFlowState>()(
       setSelectedDay: (day) =>
         set({
           selectedDay: day,
+        }),
+
+      setHasCompletedOnboarding: (val) =>
+        set({
+          hasCompletedOnboarding: val,
         }),
 
       resetStore: () =>
