@@ -76,24 +76,26 @@ export function AddClassDialog({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (open && classItem) {
-      setForm({
-        subject: classItem.subject,
-        code: classItem.code,
-        faculty: classItem.faculty,
-        room: classItem.room,
-        day: classItem.day,
-        startTime: classItem.startTime,
-        endTime: classItem.endTime,
-        type: classItem.type,
-      });
-    }
+    queueMicrotask(() => {
+      if (open && classItem) {
+        setForm({
+          subject: classItem.subject,
+          code: classItem.code,
+          faculty: classItem.faculty,
+          room: classItem.room,
+          day: classItem.day,
+          startTime: classItem.startTime,
+          endTime: classItem.endTime,
+          type: classItem.type,
+        });
+      }
 
-    if (open && !classItem) {
-      setForm(emptyForm);
-    }
+      if (open && !classItem) {
+        setForm(emptyForm);
+      }
 
-    setError("");
+      setError("");
+    });
   }, [open, classItem]);
 
   function updateField(

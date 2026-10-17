@@ -11,6 +11,7 @@ import {
 
 import { AppShell } from "@/components/layout/app-shell";
 import { AddAssignmentDialog } from "@/components/assignments/add-assignment-dialog";
+import { SyncTeamsDialog } from "@/components/assignments/sync-teams-dialog";
 import { useCampusFlowStore } from "@/stores/campusflow-store";
 import type { Assignment } from "@/types/campusflow";
 
@@ -103,7 +104,10 @@ export default function AssignmentsPage() {
               </p>
             </div>
 
-            <AddAssignmentDialog />
+            <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+              <SyncTeamsDialog />
+              <AddAssignmentDialog />
+            </div>
           </section>
 
           {/* SUMMARY */}
@@ -339,6 +343,16 @@ function AssignmentCard({
             <span className="border border-border bg-muted px-2 py-0.5 text-[10px] text-muted-foreground">
               DUE {assignment.dueDate}
             </span>
+
+            {assignment.source === "teams" && (
+              <span className="inline-flex items-center gap-1 rounded border border-[#5B5FC7]/40 bg-[#5B5FC7]/15 px-2 py-0.5 text-[10px] font-bold text-[#5B5FC7]">
+                <svg className="h-3 w-3" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M17.5 7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM21.5 12h-4a1 1 0 0 0-1 1v4.5a3.5 3.5 0 0 0 7 0V13a1 1 0 0 0-2-1Z" opacity="0.8" />
+                  <path d="M11 6a3 3 0 1 0 0-6 3 3 0 0 0 0 6ZM16 11H6a2 2 0 0 0-2 2v6a5 5 0 0 0 10 0v-6a2 2 0 0 0 2-2Z" />
+                </svg>
+                MS TEAMS
+              </span>
+            )}
           </div>
         </div>
 

@@ -11,6 +11,11 @@ import {
 import { AppShell } from "@/components/layout/app-shell";
 import { getNotificationIds } from "@/lib/notifications";
 import { useCampusFlowStore } from "@/stores/campusflow-store";
+import {
+  getEffectiveClasses,
+  getMinutesUntil,
+  getNextDayFirstClass,
+} from "@/lib/schedule";
 
 type Notification = {
   id: string;
@@ -41,6 +46,14 @@ export default function NotificationsPage() {
     (state) => state.overrides
   );
 
+  const timetable = useCampusFlowStore(
+    (state) => state.timetable
+  );
+
+  const daySwaps = useCampusFlowStore(
+    (state) => state.daySwaps || []
+  );
+
   const readNotificationIds = useCampusFlowStore(
     (state) => state.readNotificationIds
   );
@@ -49,6 +62,7 @@ export default function NotificationsPage() {
     (state) => state.markNotificationRead
   );
 
+  const now = new Date();
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
@@ -58,6 +72,44 @@ export default function NotificationsPage() {
   const twoDaysKey = getDateKey(twoDays);
 
   const notifications: Notification[] = [];
+
+  /* LIVE CLASS NOTIFICATIONS */
+  const todayClasses = getEffectiveClasses(timetable, overrides, now, daySwaps);
+
+  // 1. Next class starting in <= 5 minutes
+  const startingSoon = todayClasses.find((c) => {
+    const mins = getMinutesUntil(c.startTime, now);
+    return mins > 0 && mins <= 5;
+  });
+
+  if (startingSoon) {
+    const mins = getMinutesUntil(startingSoon.startTime, now);
+    notifications.push({
+      id: `class-starting-soon-${startingSoon.id}`,
+      type: "schedule",
+      title: `${startingSoon.code || startingSoon.subject} starts in ${mins} min`,
+      description: `Starts at ${startingSoon.startTime} · ${startingSoon.room || "Room TBA"} (${startingSoon.faculty || "Faculty TBA"})`,
+      meta: "STARTING SOON",
+    });
+  }
+
+  // 2. All classes done for today notification
+  if (todayClasses.length > 0) {
+    const currentTimeStr = `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+    const lastClass = todayClasses[todayClasses.length - 1];
+    if (currentTimeStr >= lastClass.endTime) {
+      const nextDayInfo = getNextDayFirstClass(timetable, overrides, daySwaps, now);
+      notifications.push({
+        id: `classes-all-done-today-${getDateKey(now)}`,
+        type: "success",
+        title: "All done for today! 🎉",
+        description: nextDayInfo
+          ? `All classes for today have concluded. Next class is ${nextDayInfo.firstClass.code || nextDayInfo.firstClass.subject} on ${nextDayInfo.isTomorrow ? "Tomorrow" : nextDayInfo.dayName} at ${nextDayInfo.firstClass.startTime}.`
+          : "All classes for today have ended. Great job today!",
+        meta: "DAY CONCLUDED",
+      });
+    }
+  }
 
   /* ASSIGNMENT NOTIFICATIONS */
 
@@ -131,7 +183,10 @@ export default function NotificationsPage() {
   const unreadNotificationCount = getNotificationIds(
     assignments,
     tasks,
-    overrides
+    overrides,
+    now,
+    timetable,
+    daySwaps
   ).filter((id) => !readNotificationIds.includes(id)).length;
 
   return (

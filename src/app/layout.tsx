@@ -20,8 +20,8 @@ const pixel = Pixelify_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "CampusFlow",
-  description: "Your college life, in one flow.",
+  title: "CampusFlow | Your academic OS",
+  description: "Bring your timetable, assignments, and tasks together in one calm workspace.",
 };
 
 export default function RootLayout({

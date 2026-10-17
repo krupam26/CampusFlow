@@ -27,7 +27,9 @@ export function ThemeProvider({
       ? savedTheme
       : systemTheme;
 
-    setThemeState(nextTheme);
+    queueMicrotask(() => {
+      setThemeState(nextTheme);
+    });
     document.documentElement.classList.toggle("dark", nextTheme === "dark");
   }, []);
 
